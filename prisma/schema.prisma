@@ -11,9 +11,31 @@ generator client {
 }
 
 model User {
-  id         String    @id @default(uuid())
-  email      String    @unique
-  name       String?
-  password   String
-  created_at DateTime?
+  id            String          @id @default(uuid())
+  email         String          @unique
+  name          String?
+  password      String
+  authType      String          @default("native")
+  createdAt     DateTime        @default(now())
+  ReviewRequest ReviewRequest[]
+}
+
+model ReviewRequest {
+  id             String           @id @default(uuid())
+  askMessage     String?
+  videoUrl       String
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @default(now())
+  user           User             @relation(fields: [userId], references: [id])
+  userId         String
+  ReviewResponse ReviewResponse[]
+}
+
+model ReviewResponse {
+  id               String        @id @default(uuid())
+  customerName     String
+  whatYouDo        String?
+  videoUrl         String
+  requestMessage   ReviewRequest @relation(fields: [requestMessageId], references: [id])
+  requestMessageId String
 }

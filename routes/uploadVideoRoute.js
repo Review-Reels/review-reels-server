@@ -3,14 +3,16 @@ const router = require("express").Router();
 const { uploadToS3, signedUrl } = require("../s3");
 
 router.post("/upload_video", async (req, res) => {
-  let { name, data } = req.files.flename;
+  let { name, data, size, mimetype } = req.files.flename;
+  console.log(req.files);
+  return;
   try {
     uploadToS3(name, data)
-      .then((data) => {
+      .then((uploadResponse) => {
         console.log(data);
         signedUrl(name)
-          .then((data) => {
-            res.json(data);
+          .then((signedUrl) => {
+            res.json(signedUrl);
           })
           .catch((err) => {
             console.log(err);
