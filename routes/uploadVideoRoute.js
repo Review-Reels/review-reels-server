@@ -1,7 +1,7 @@
 const router = require("express").Router();
 
 const { uploadToS3, signedUrl } = require("../s3");
-
+//depreciated just kept for reference
 router.post("/upload_video", async (req, res) => {
   let { name, data, size } = req.files.flename;
   try {

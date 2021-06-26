@@ -18,8 +18,10 @@ app.use(express.json());
 //import routes
 const authRoute = require("./routes/AuthRoute");
 const uploadRoute = require("./routes/uploadVideoRoute");
+const reviewRequestRoute = require("./routes/reviewRequestRoute");
 //route middleware
 app.use("/api/user", authRoute);
-app.use("/api/upload", uploadRoute);
+// app.use("/api/upload", uploadRoute);
+app.use("/api/review", reviewRequestRoute);
 
 app.listen(3000, () => console.log("Server Started!"));

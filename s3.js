@@ -27,6 +27,22 @@ const uploadToS3 = (fileName, fileContent) => {
   // });
 };
 
+const deleteFromS3 = (fileName) => {
+  const params = {
+    Bucket: process.env.AWS_BUCKET_NAME,
+    Key: fileName,
+  };
+
+  return new Promise((resolve, reject) => {
+    s3.deleteObject(params, (err, data) => {
+      if (err) {
+        reject(err);
+      }
+      resolve(data);
+    });
+  });
+};
+
 const signedUrl = (fileName) => {
   return s3.getSignedUrlPromise("getObject", {
     Bucket: process.env.AWS_BUCKET_NAME,
@@ -34,4 +50,4 @@ const signedUrl = (fileName) => {
   });
 };
 
-module.exports = { uploadToS3, signedUrl };
+module.exports = { uploadToS3, signedUrl, deleteFromS3 };

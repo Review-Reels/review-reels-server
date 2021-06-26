@@ -24,7 +24,7 @@ model ReviewRequest {
   id             String           @id @default(uuid())
   askMessage     String?
   videoUrl       String
-  size           BigInt
+  size           Int
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @default(now())
   user           User             @relation(fields: [userId], references: [id])
@@ -37,7 +37,7 @@ model ReviewResponse {
   customerName     String
   whatYouDo        String?
   videoUrl         String
-  size             BigInt
+  size             Int
   requestMessage   ReviewRequest @relation(fields: [requestMessageId], references: [id])
   requestMessageId String
 }
