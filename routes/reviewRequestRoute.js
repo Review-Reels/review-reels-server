@@ -15,6 +15,9 @@ router.get("/reviewRequest/:id", auth, async (req, res) => {
         id: params.id,
       },
     });
+    currentReviewRequest.signedUrl = await signedUrl(
+      currentReviewRequest.videoUrl
+    );
 
     res.send(currentReviewRequest);
   } catch (e) {
