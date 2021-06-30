@@ -5,27 +5,60 @@ const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 const auth = require("./VerifyToken");
 const { uploadToS3, deleteFromS3, signedUrl } = require("../s3");
+const { request } = require("express");
 
-router.get("/reviewRequest/:id", auth, async (req, res) => {
-  const { params } = req;
+router.get("/reviewRequest", auth, async (req, res) => {
+  const { user } = req;
 
   try {
-    const currentReviewRequest = await prisma.reviewRequest.findUnique({
+    const currentReviewRequest = await prisma.reviewRequest.findMany({
       where: {
-        id: params.id,
+        userId: user.id,
       },
     });
-    currentReviewRequest.signedUrl = await signedUrl(
-      currentReviewRequest.videoUrl
-    );
-
-    res.send(currentReviewRequest);
+    let requests = [];
+    currentReviewRequest.map((request) => {
+      requests.push(signedUrl(request.videoUrl));
+    });
+    let reviewRequests = [];
+    Promise.all(requests).then((response) => {
+      reviewRequests = currentReviewRequest.map((request, i) => {
+        return { ...request, signedUrl: response[i] };
+      });
+      res.send(reviewRequests);
+    });
   } catch (e) {
     console.log(e);
-    res.status(400).json(e.errors);
+    res.status(400).json(e);
   }
 });
 
+//without auth
+router.get("/reviewRequest/:username", async (req, res) => {
+  const { params } = req;
+
+  try {
+    const currentReviewRequest = await prisma.reviewRequest.findMany({
+      where: {
+        user: { username: params.username },
+      },
+    });
+    let requests = [];
+    currentReviewRequest.map((request) => {
+      requests.push(signedUrl(request.videoUrl));
+    });
+    let reviewRequests = [];
+    Promise.all(requests).then((response) => {
+      reviewRequests = currentReviewRequest.map((request, i) => {
+        return { ...request, signedUrl: response[i] };
+      });
+      res.send(reviewRequests);
+    });
+  } catch (e) {
+    console.log(e);
+    res.status(400).json(e);
+  }
+});
 router.post("/reviewRequest", auth, async (req, res) => {
   const { files, body, user } = req;
   const { name, data, size } = files.fileName;
@@ -48,7 +81,7 @@ router.post("/reviewRequest", auth, async (req, res) => {
     res.send(currentReviewRequest);
   } catch (e) {
     console.log(e);
-    res.status(400).json(e.errors);
+    res.status(400).json(e);
   }
 });
 
@@ -77,7 +110,7 @@ router.put("/reviewRequest/:id", auth, async (req, res) => {
     res.send(currentReviewRequest);
   } catch (e) {
     console.log(e);
-    res.status(400).json(e.errors);
+    res.status(400).json(e);
   }
 });
 
@@ -96,7 +129,7 @@ router.delete("/reviewRequest/:id", auth, async (req, res) => {
     res.status(201);
   } catch (e) {
     console.log(e);
-    res.status(400).json(e.errors);
+    res.status(400).json(e);
   }
 });
 
