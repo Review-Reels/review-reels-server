@@ -15,7 +15,8 @@ model User {
   email         String          @unique
   username      String          @unique
   name          String?
-  password      String
+  password      String?
+  picture       String?
   authType      String          @default("native")
   createdAt     DateTime        @default(now())
   ReviewRequest ReviewRequest[]
