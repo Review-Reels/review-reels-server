@@ -11,19 +11,9 @@ router.post("/signup", async (req, res) => {
   let userObj = req.body;
   let userData = {};
   try {
-    if (userObj?.authType !== "google") {
-      const salt = await bcrypt.genSalt(10);
-      userObj.password = await bcrypt.hash(userObj.password, salt);
-      userData = { ...userObj };
-    } else {
-      const verifiedUser = await verifyAndGetUser(userObj.idToken);
-      if (verifiedUser)
-        userData = {
-          ...verifiedUser,
-          username: userObj.username,
-          authType: userObj.authType,
-        };
-    }
+    const salt = await bcrypt.genSalt(10);
+    userObj.password = await bcrypt.hash(userObj.password, salt);
+    userData = { ...userObj };
     const user = await prisma.user.create({ data: userData });
 
     res.json(user);
@@ -41,35 +31,48 @@ router.post("/signin", async (req, res) => {
       where: { email: signIn.email },
     });
     if (user) {
-      if (signIn?.authType !== "google") {
-        if (bcrypt.compare(signIn.password, user.password)) {
-          //create and assign a token
-          const token = jwt.sign({ _id: user.id }, process.env.TOKEN_SECRET, {
-            expiresIn: "7d",
-          });
-          const removeFields = ({ password, ...rest }) => rest;
+      if (bcrypt.compare(signIn.password, user.password)) {
+        //create and assign a token
+        const token = jwt.sign({ _id: user.id }, process.env.TOKEN_SECRET, {
+          expiresIn: "7d",
+        });
+        const removeFields = ({ password, ...rest }) => rest;
 
-          res.json({ Authorization: token, ...removeFields(user) });
-        } else res.json({ message: "Password wrong" });
-      } else {
-        const verifiedUser = await verifyAndGetUser(signIn.idToken);
-        if (verifiedUser) {
-          const userData = {
-            ...verifiedUser,
-            username: user.username,
-          };
-          const token = jwt.sign({ _id: user.id }, process.env.TOKEN_SECRET, {
-            expiresIn: "7d",
-          });
-          res.json({ Authorization: token, ...userData });
-        } else {
-          res.json({ message: "Cannot verify User" });
-        }
-      }
+        res.json({ Authorization: token, ...removeFields(user) });
+      } else res.json({ message: "Password wrong" });
     } else res.json({ message: "User does not exist" });
   } catch (e) {
     console.log(e);
     res.json({ message: "Something went wrong! Please try again later" });
+  }
+});
+
+//sign up route
+router.post("/google_sign_in", async (req, res) => {
+  const userObj = req.body;
+  try {
+    const verifiedUser = await verifyAndGetUser(userObj.idToken);
+    if (verifiedUser) {
+      const userData = {
+        ...verifiedUser,
+        username: "",
+        authType: "google",
+      };
+      let user = await prisma.user.findUnique({
+        where: { email: verifiedUser.email },
+      });
+      if (!user) {
+        user = await prisma.user.create({ data: userData });
+      }
+      const token = jwt.sign({ _id: user.id }, process.env.TOKEN_SECRET, {
+        expiresIn: "7d",
+      });
+      res.json({ Authorization: token, ...userData });
+    } else {
+      res.json({ message: "Cannot verify user" });
+    }
+  } catch (e) {
+    console.log(e);
   }
 });
 
