@@ -5,7 +5,6 @@ const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 const auth = require("./VerifyToken");
 const { uploadToS3, deleteFromS3, signedUrl } = require("../s3");
-const { request } = require("express");
 
 router.get("/reviewRequest", auth, async (req, res) => {
   const { user } = req;

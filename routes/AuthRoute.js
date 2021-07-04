@@ -15,8 +15,8 @@ router.post("/signup", async (req, res) => {
     userObj.password = await bcrypt.hash(userObj.password, salt);
     userData = { ...userObj };
     const user = await prisma.user.create({ data: userData });
-
-    res.json(user);
+    const removeFields = ({ password, ...rest }) => rest;
+    res.json(removeFields(user));
   } catch (e) {
     console.log(e);
     res.status(400).json({ message: e.meta.target });
@@ -47,7 +47,7 @@ router.post("/signin", async (req, res) => {
   }
 });
 
-//sign up route
+// google sign up route
 router.post("/google_sign_in", async (req, res) => {
   const userObj = req.body;
   try {

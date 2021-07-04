@@ -4,7 +4,7 @@ const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
 module.exports = async function auth(req, res, next) {
-  const token = req.header("Authorization");
+  const token = req.header("Authorization").replace(/^Bearer\s+/, "");
   if (!token) return res.status(401).json({ message: "Access Denied" });
   try {
     const verified = jwt.verify(token, process.env.TOKEN_SECRET);
