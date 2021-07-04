@@ -13,14 +13,6 @@ function verify(token) {
       process.env.ANDROID_CLIENT_ID,
     ],
   });
-  //     const payload = ticket.getPayload();
-  //     // const userid = payload["sub"];
-  //     return payload;
-  //   } catch (e) {
-  //     return e;
-  //   }
-  // If request specified a G Suite domain:
-  // const domain = payload['hd'];
 }
 
 module.exports = async function verifyAndGetUser(token) {

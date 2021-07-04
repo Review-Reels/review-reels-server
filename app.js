@@ -17,7 +17,7 @@ app.use(express.json());
 
 //import routes
 const authRoute = require("./routes/AuthRoute");
-const userRoute = require("./routes/userRoute");
+const userRoute = require("./routes/UserRoute");
 // const uploadRoute = require("./routes/uploadVideoRoute");
 const reviewRequestRoute = require("./routes/reviewRequestRoute");
 //route middleware
