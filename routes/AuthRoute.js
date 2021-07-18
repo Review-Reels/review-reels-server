@@ -67,7 +67,11 @@ router.post("/google_sign_in", async (req, res) => {
       const token = jwt.sign({ _id: user.id }, process.env.TOKEN_SECRET, {
         expiresIn: "7d",
       });
-      res.json({ Authorization: token, ...userData });
+      const removeFields = ({ password, ...rest }) => rest;
+      res.json({
+        Authorization: token,
+        ...removeFields({ ...userData, ...user }),
+      });
     } else {
       res.json({ message: "Cannot verify user" });
     }

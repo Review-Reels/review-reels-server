@@ -48,6 +48,7 @@ const signedUrl = (fileName) => {
   return s3.getSignedUrlPromise("getObject", {
     Bucket: process.env.AWS_BUCKET_NAME,
     Key: fileName,
+    Expires: 604800,
   });
 };
 
