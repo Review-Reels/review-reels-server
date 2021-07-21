@@ -15,11 +15,7 @@ router.get("/reviewResponse", auth, async (req, res) => {
         requestMessage: { userId: user.id },
       },
     });
-    let requests = [];
-    currentReviewResponse.map((request) => {
-      requests.push(signedUrl(request.videoUrl));
-    });
-    let reviewResponse = [];
+    res.send(currentReviewResponse);
   } catch (e) {
     console.log(e);
     res.status(400).json(e);

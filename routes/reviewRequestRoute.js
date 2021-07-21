@@ -42,6 +42,14 @@ router.post("/reviewRequest", auth, async (req, res) => {
   const { files, body, user } = req;
   const { name, data, size } = files.fileName;
   const { askMessage } = body;
+  const existingRequests = await prisma.reviewRequest.findFirst({
+    where: {
+      userId: user.id,
+    },
+  });
+  if (existingRequests) {
+    res.send({ message: "You can only create one review request" });
+  }
 
   const s3FileName = `${user.id}/${name}`;
   try {
@@ -55,7 +63,6 @@ router.post("/reviewRequest", auth, async (req, res) => {
         userId: user.id,
       },
     });
-    currentReviewRequest.signedUrl = await signedUrl(s3FileName);
 
     res.send(currentReviewRequest);
   } catch (e) {
@@ -84,7 +91,6 @@ router.put("/reviewRequest/:id", auth, async (req, res) => {
         userId: user.id,
       },
     });
-    currentReviewRequest.signedUrl = await signedUrl(s3FileName);
 
     res.send(currentReviewRequest);
   } catch (e) {
