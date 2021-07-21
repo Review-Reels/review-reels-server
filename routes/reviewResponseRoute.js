@@ -4,7 +4,7 @@ const { PrismaClient } = require("@prisma/client");
 
 const prisma = new PrismaClient();
 const auth = require("./VerifyToken");
-const { uploadToS3, deleteFromS3, signedUrl } = require("../s3");
+const { uploadToS3, deleteFromS3 } = require("../s3");
 
 router.get("/reviewResponse", auth, async (req, res) => {
   const { user } = req;
@@ -20,12 +20,6 @@ router.get("/reviewResponse", auth, async (req, res) => {
       requests.push(signedUrl(request.videoUrl));
     });
     let reviewResponse = [];
-    Promise.all(requests).then((response) => {
-      reviewResponse = currentReviewResponse.map((request, i) => {
-        return { ...request, signedUrl: response[i] };
-      });
-      res.send(reviewResponse);
-    });
   } catch (e) {
     console.log(e);
     res.status(400).json(e);
@@ -76,7 +70,6 @@ router.post("/reviewResponse", async (req, res) => {
         requestMessageId: reviewRequestId,
       },
     });
-    currentReviewResponse.signedUrl = await signedUrl(s3FileName);
 
     res.send(currentReviewResponse);
   } catch (e) {
