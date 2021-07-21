@@ -42,29 +42,30 @@ router.post("/reviewRequest", auth, async (req, res) => {
   const { files, body, user } = req;
   const { name, data, size } = files.fileName;
   const { askMessage } = body;
-  const existingRequests = await prisma.reviewRequest.findFirst({
-    where: {
-      userId: user.id,
-    },
-  });
-  if (existingRequests) {
-    res.send({ message: "You can only create one review request" });
-  }
 
-  const s3FileName = `${user.id}/${name}`;
   try {
-    const uploadResponse = await uploadToS3(s3FileName, data);
-
-    const currentReviewRequest = await prisma.reviewRequest.create({
-      data: {
-        askMessage,
-        size,
-        videoUrl: s3FileName,
+    const existingRequests = await prisma.reviewRequest.findFirst({
+      where: {
         userId: user.id,
       },
     });
+    if (existingRequests) {
+      res.send({ message: "You can only create one review request" });
+    } else {
+      const s3FileName = `${user.id}/${name}`;
+      const uploadResponse = await uploadToS3(s3FileName, data);
 
-    res.send(currentReviewRequest);
+      const currentReviewRequest = await prisma.reviewRequest.create({
+        data: {
+          askMessage,
+          size,
+          videoUrl: s3FileName,
+          userId: user.id,
+        },
+      });
+
+      res.send(currentReviewRequest);
+    }
   } catch (e) {
     console.log(e);
     res.status(400).json(e);
