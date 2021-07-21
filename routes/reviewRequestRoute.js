@@ -4,7 +4,7 @@ const { PrismaClient } = require("@prisma/client");
 
 const prisma = new PrismaClient();
 const auth = require("./VerifyToken");
-const { uploadToS3, deleteFromS3 } = require("../s3");
+const { uploadToS3, deleteFromS3, signedUrl } = require("../s3");
 
 router.get("/reviewRequest", auth, async (req, res) => {
   const { user } = req;
@@ -15,11 +15,7 @@ router.get("/reviewRequest", auth, async (req, res) => {
         userId: user.id,
       },
     });
-    let requests = [];
-    currentReviewRequest.map((request) => {
-      requests.push(signedUrl(request.videoUrl));
-    });
-    let reviewRequests = [];
+    res.send(currentReviewRequest);
   } catch (e) {
     console.log(e);
     res.status(400).json(e);
@@ -36,11 +32,7 @@ router.get("/reviewRequest/:username", async (req, res) => {
         user: { username: params.username },
       },
     });
-    let requests = [];
-    currentReviewRequest.map((request) => {
-      requests.push(signedUrl(request.videoUrl));
-    });
-    let reviewRequests = [];
+    res.send(currentReviewRequest);
   } catch (e) {
     console.log(e);
     res.status(400).json(e);
@@ -63,6 +55,7 @@ router.post("/reviewRequest", auth, async (req, res) => {
         userId: user.id,
       },
     });
+    currentReviewRequest.signedUrl = await signedUrl(s3FileName);
 
     res.send(currentReviewRequest);
   } catch (e) {
@@ -91,6 +84,8 @@ router.put("/reviewRequest/:id", auth, async (req, res) => {
         userId: user.id,
       },
     });
+    currentReviewRequest.signedUrl = await signedUrl(s3FileName);
+
     res.send(currentReviewRequest);
   } catch (e) {
     console.log(e);
