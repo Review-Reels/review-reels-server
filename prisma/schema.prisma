@@ -40,6 +40,8 @@ model ReviewResponse {
   whatYouDo        String?
   videoUrl         String
   size             Int
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @default(now())
   requestMessage   ReviewRequest @relation(fields: [requestMessageId], references: [id])
   requestMessageId String
 }
