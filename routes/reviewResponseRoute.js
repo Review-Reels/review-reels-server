@@ -74,34 +74,26 @@ router.post("/reviewResponse", async (req, res) => {
   }
 });
 
-// router.put("/reviewRequest/:id", auth, async (req, res) => {
-//   const { files, body, user, params } = req;
-//   const { name, data, size } = files.fileName;
-//   const { askMessage } = body;
+router.put("/reviewResponse/:id", auth, async (req, res) => {
+  const { body, user, params } = req;
+  const { isRead } = body;
 
-//   const s3FileName = `${user.id}/${name}`;
-//   try {
-//     const uploadResponse = await uploadToS3(s3FileName, data);
+  try {
+    const currentReviewResponse = await prisma.reviewResponse.update({
+      where: {
+        id: params.id,
+      },
+      data: {
+        isRead,
+      },
+    });
 
-//     const currentReviewRequest = await prisma.reviewRequest.update({
-//       where: {
-//         id: params.id,
-//       },
-//       data: {
-//         askMessage,
-//         size,
-//         videoUrl: s3FileName,
-//         userId: user.id,
-//       },
-//     });
-//     currentReviewRequest.signedUrl = await signedUrl(s3FileName);
-
-//     res.send(currentReviewRequest);
-//   } catch (e) {
-//     console.log(e);
-//     res.status(400).json(e);
-//   }
-// });
+    res.send(currentReviewResponse);
+  } catch (e) {
+    console.log(e);
+    res.status(400).json(e);
+  }
+});
 
 // router.delete("/reviewRequest/:id", auth, async (req, res) => {
 //   const { params } = req;

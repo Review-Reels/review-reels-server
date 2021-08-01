@@ -42,6 +42,8 @@ model ReviewResponse {
   size             Int
   createdAt        DateTime      @default(now())
   updatedAt        DateTime      @default(now())
+  isRead           Boolean       @default(false)
   requestMessage   ReviewRequest @relation(fields: [requestMessageId], references: [id])
   requestMessageId String
+
 }
