@@ -50,9 +50,9 @@ router.get("/reviewResponse", auth, async (req, res) => {
 // });
 router.post("/reviewResponse", async (req, res) => {
   const { files, body } = req;
-  const { name, data, size } = files.fileName;
+  const { data, size } = files.fileName;
   const { whatYouDo, customerName, reviewRequestId } = body;
-
+  const name = new Date().toISOString() + ".mp4";
   const s3FileName = `${reviewRequestId}/${name}`;
   try {
     const uploadResponse = await uploadToS3(s3FileName, data);
