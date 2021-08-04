@@ -1,4 +1,5 @@
 const AWS = require("aws-sdk");
+
 AWS.config.update({ region: process.env.AWS_REGION });
 const s3 = new AWS.S3({
   accessKeyId: process.env.AWS_ACCESS_KEY_ID,
@@ -6,26 +7,22 @@ const s3 = new AWS.S3({
   signatureVersion: "v4",
 });
 
-const uploadToS3 = (fileName, fileContent) => {
+const uploadToS3 = (fileName, fileContent, fileExtension = ".mp4") => {
   const params = {
     Bucket: process.env.AWS_BUCKET_NAME,
-    Key: fileName,
+    Key: fileName + fileExtension,
     Body: fileContent,
   };
 
   return new Promise((resolve, reject) => {
-    s3.upload(params, (err, data) => {
+    s3.upload(params, async (err, data) => {
       if (err) {
         reject(err);
       }
+
       resolve(data.Location);
     });
   });
-  // return s3.upload(params, (err, data) => {
-  //   if (err) {
-  //     return err;
-  //   }
-  // });
 };
 
 const deleteFromS3 = (fileName) => {
