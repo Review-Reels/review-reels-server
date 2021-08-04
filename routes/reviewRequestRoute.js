@@ -93,6 +93,8 @@ router.put("/reviewRequest/:id", auth, async (req, res) => {
         },
         data: {
           askMessage,
+          videoUrl: s3FileName + ".mp4",
+          imageUrl: s3FileName + ".jpg",
           size,
           userId: user.id,
         },
