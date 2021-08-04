@@ -80,7 +80,9 @@ router.put("/reviewRequest/:id", auth, async (req, res) => {
   const { askMessage } = body;
 
   try {
-    const review = await prisma.reviewRequest.findUnique({ id: params.id });
+    const review = await prisma.reviewRequest.findUnique({
+      where: { id: params.id },
+    });
     const s3FileName = review.videoUrl.replace(".mp4", "");
     await upload(s3FileName, data);
 
