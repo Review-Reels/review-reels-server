@@ -83,19 +83,23 @@ router.put("/reviewRequest/:id", auth, async (req, res) => {
     const review = await prisma.reviewRequest.findUnique({
       where: { id: params.id },
     });
-    const s3FileName = review.videoUrl.replace(".mp4", "");
-    await upload(s3FileName, data);
+    if (review) {
+      const s3FileName = review.videoUrl.replace(".mp4", "");
+      await upload(s3FileName, data);
 
-    const currentReviewRequest = await prisma.reviewRequest.update({
-      where: {
-        id: params.id,
-      },
-      data: {
-        askMessage,
-        size,
-        userId: user.id,
-      },
-    });
+      const currentReviewRequest = await prisma.reviewRequest.update({
+        where: {
+          id: params.id,
+        },
+        data: {
+          askMessage,
+          size,
+          userId: user.id,
+        },
+      });
+    } else {
+      res.status(400).json({ message: "review request doesn't exist" });
+    }
 
     res.send(currentReviewRequest);
   } catch (e) {
