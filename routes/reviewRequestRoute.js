@@ -4,7 +4,8 @@ const { PrismaClient } = require("@prisma/client");
 
 const prisma = new PrismaClient();
 const auth = require("./VerifyToken");
-const { uploadToS3, deleteFromS3, signedUrl } = require("../s3");
+// const { uploadToS3, deleteFromS3 } = require("../aws/s3");
+const { upload } = require("../utils/upload");
 
 router.get("/reviewRequest", auth, async (req, res) => {
   const { user } = req;
@@ -40,9 +41,9 @@ router.get("/reviewRequest/:username", async (req, res) => {
 });
 router.post("/reviewRequest", auth, async (req, res) => {
   const { files, body, user } = req;
-  const { name, data, size } = files.fileName;
+  const { data, size } = files.fileName;
   const { askMessage } = body;
-
+  const name = new Date().toISOString();
   try {
     const existingRequests = await prisma.reviewRequest.findFirst({
       where: {
@@ -53,13 +54,14 @@ router.post("/reviewRequest", auth, async (req, res) => {
       res.send({ message: "You can only create one review request" });
     } else {
       const s3FileName = `${user.id}/${name}`;
-      const uploadResponse = await uploadToS3(s3FileName, data);
+      await upload(s3FileName, data);
 
       const currentReviewRequest = await prisma.reviewRequest.create({
         data: {
           askMessage,
           size,
-          videoUrl: s3FileName,
+          videoUrl: s3FileName + ".mp4",
+          imageUrl: s3FileName + ".jpg",
           userId: user.id,
         },
       });
@@ -74,12 +76,13 @@ router.post("/reviewRequest", auth, async (req, res) => {
 
 router.put("/reviewRequest/:id", auth, async (req, res) => {
   const { files, body, user, params } = req;
-  const { name, data, size } = files.fileName;
+  const { data, size } = files.fileName;
   const { askMessage } = body;
 
-  const s3FileName = `${user.id}/${name}`;
   try {
-    const uploadResponse = await uploadToS3(s3FileName, data);
+    const review = await prisma.reviewRequest.findUnique({ id: params.id });
+    const s3FileName = review.videoUrl.replace(".mp4", "");
+    await upload(s3FileName, data);
 
     const currentReviewRequest = await prisma.reviewRequest.update({
       where: {
@@ -88,7 +91,6 @@ router.put("/reviewRequest/:id", auth, async (req, res) => {
       data: {
         askMessage,
         size,
-        videoUrl: s3FileName,
         userId: user.id,
       },
     });

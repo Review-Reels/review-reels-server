@@ -4,12 +4,14 @@ const { PrismaClient } = require("@prisma/client");
 
 const prisma = new PrismaClient();
 const auth = require("./VerifyToken");
-const { uploadToS3 } = require("../s3");
+const { uploadToS3 } = require("../aws/s3");
 const {
   createThumbNail,
   removeLocalFile,
 } = require("../utils/createThumbNail");
 const fs = require("fs");
+
+const { upload } = require("../utils/upload");
 
 router.get("/reviewResponse", auth, async (req, res) => {
   const { user } = req;
@@ -33,12 +35,7 @@ router.post("/reviewResponse", async (req, res) => {
   const name = new Date().toISOString();
   const s3FileName = `${reviewRequestId}/${name}`;
   try {
-    const uploadResponse = await uploadToS3(s3FileName, data, ".mp4");
-    const thumbNailPath = await createThumbNail(uploadResponse);
-    const fileStream = fs.createReadStream(thumbNailPath);
-
-    await uploadToS3(s3FileName, fileStream, ".jpg");
-    removeLocalFile(thumbNailPath);
+    await upload(s3FileName, data);
 
     const currentReviewResponse = await prisma.reviewResponse.create({
       data: {
@@ -46,6 +43,7 @@ router.post("/reviewResponse", async (req, res) => {
         whatYouDo,
         size,
         videoUrl: s3FileName + ".mp4",
+        imageUrl: s3FileName + ".jpg",
         requestMessageId: reviewRequestId,
       },
     });
