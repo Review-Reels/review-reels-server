@@ -97,11 +97,10 @@ router.put("/reviewRequest/:id", auth, async (req, res) => {
           userId: user.id,
         },
       });
+      res.send(currentReviewRequest);
     } else {
       res.status(400).json({ message: "review request doesn't exist" });
     }
-
-    res.send(currentReviewRequest);
   } catch (e) {
     console.log(e);
     res.status(400).json(e);
