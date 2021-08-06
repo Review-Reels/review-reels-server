@@ -24,9 +24,9 @@ module.exports = async function auth(req, res, next) {
       req.user = currentUser;
       next();
     } else {
-      res.status(400).json({ message: "User Does Not Exist" });
+      res.status(401).json({ message: "User Does Not Exist" });
     }
   } catch (err) {
-    res.status(400).json({ message: "Invalid Token" });
+    res.status(401).json({ message: "Invalid Token" });
   }
 };
