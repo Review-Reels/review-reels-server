@@ -76,7 +76,6 @@ router.post("/reviewRequest", auth, async (req, res) => {
 
 router.put("/reviewRequest/:id", auth, async (req, res) => {
   const { files, body, user, params } = req;
-  const { data, size } = files.fileName;
   const { askMessage } = body;
 
   try {
@@ -84,8 +83,13 @@ router.put("/reviewRequest/:id", auth, async (req, res) => {
       where: { id: params.id },
     });
     if (review) {
+      let size = review.size;
       const s3FileName = review.videoUrl.replace(".mp4", "");
-      await upload(s3FileName, data);
+      if (files && files.hasOwnProperty("fileName")) {
+        let { data } = files.fileName;
+        size = files.fileName.size;
+        await upload(s3FileName, data);
+      }
 
       const currentReviewRequest = await prisma.reviewRequest.update({
         where: {

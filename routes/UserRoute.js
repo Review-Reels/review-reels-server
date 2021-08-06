@@ -9,6 +9,7 @@ const auth = require("./VerifyToken");
 router.post("/update_user", auth, async (req, res) => {
   const { user } = req;
   const userObj = req.body;
+  console.log(userObj);
   try {
     const updateUser = await prisma.user.update({
       where: {
