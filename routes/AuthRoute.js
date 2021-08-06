@@ -52,6 +52,7 @@ router.post("/google_sign_in", async (req, res) => {
   const userObj = req.body;
   try {
     const verifiedUser = await verifyAndGetUser(userObj.idToken);
+    console.log(verifiedUser);
     if (verifiedUser) {
       const userData = {
         ...verifiedUser,

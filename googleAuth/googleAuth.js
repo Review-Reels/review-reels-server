@@ -32,6 +32,8 @@ module.exports = async function verifyAndGetUser(token) {
       exp,
       given_name,
       family_name,
+      hd,
+      jti,
       ...rest
     }) => rest;
     return removeFields(userInfo);
