@@ -44,6 +44,7 @@ router.post("/reviewRequest", auth, async (req, res) => {
   const { data, size } = files.fileName;
   const { askMessage } = body;
   const name = new Date().toISOString();
+  console.log(data, size, name);
   try {
     const existingRequests = await prisma.reviewRequest.findFirst({
       where: {
