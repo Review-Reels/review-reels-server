@@ -20,6 +20,11 @@ router.get("/reviewResponse", auth, async (req, res) => {
       where: {
         requestMessage: { userId: user.id },
       },
+      orderBy: [
+        {
+          createdAt: "desc",
+        },
+      ],
     });
     res.send(currentReviewResponse);
   } catch (e) {
