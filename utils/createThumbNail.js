@@ -1,7 +1,6 @@
 var ffmpeg = require("fluent-ffmpeg");
 const fs = require("fs");
 const { nanoid } = require("nanoid");
-const { resolve } = require("path");
 
 const createThumbNail = (fileContent) => {
   const fileName = `${nanoid()}.jpg`;
@@ -18,8 +17,8 @@ const createThumbNail = (fileContent) => {
       })
       .takeScreenshots(
         {
+          count: 1,
           filename: fileName,
-          timemarks: [2],
         },
         path
       );
