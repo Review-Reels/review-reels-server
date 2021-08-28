@@ -18,6 +18,7 @@ module.exports = async function auth(req, res, next) {
         name: true,
         createdAt: true,
         authType: true,
+        username: true,
       },
     });
     if (currentUser) {

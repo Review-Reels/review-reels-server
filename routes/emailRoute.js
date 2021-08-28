@@ -29,7 +29,7 @@ router.post("/sendMail", auth, async (req, res) => {
   const smtpTransport = nodemailer.createTransport(mg(mailgunAuth));
 
   const template = handlebars.compile(emailTemplateSource);
-
+  console.log(user);
   try {
     const reviewRequest = await prisma.reviewRequest.findUnique({
       where: {
