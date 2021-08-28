@@ -24,6 +24,7 @@ const mailgunAuth = {
 };
 
 router.post("/sendMail", auth, async (req, res) => {
+  const { user } = req;
   const { subject, sendTo, reviewRequestId } = req.body;
   const smtpTransport = nodemailer.createTransport(mg(mailgunAuth));
 
@@ -40,7 +41,7 @@ router.post("/sendMail", auth, async (req, res) => {
     sendTo.map(async (sender) => {
       const htmlToSend = template({
         askMessage: reviewRequest.askMessage,
-        reviewRequestUrl: `${process.env.WEB_APP_URL}${req.user.username}`,
+        reviewRequestUrl: `${process.env.WEB_APP_URL}${user.username}`,
         imageUrl: `${process.env.S3_URL}${reviewRequest.imageUrl}`,
       });
 
