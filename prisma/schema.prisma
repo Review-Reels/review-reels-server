@@ -34,19 +34,30 @@ model ReviewRequest {
   user           User             @relation(fields: [userId], references: [id])
   userId         String
   ReviewResponse ReviewResponse[]
+  EmailTracker   EmailTracker[]
 }
 
 model ReviewResponse {
-  id               String        @id @default(uuid())
+  id               String         @id @default(uuid())
   customerName     String
   whatYouDo        String?
   videoUrl         String
-  imageUrl         String        @default("")
+  imageUrl         String         @default("")
   size             Int
-  createdAt        DateTime      @default(now())
-  updatedAt        DateTime      @default(now())
-  isRead           Boolean       @default(false)
-  requestMessage   ReviewRequest @relation(fields: [requestMessageId], references: [id])
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @default(now())
+  isRead           Boolean        @default(false)
+  requestMessage   ReviewRequest  @relation(fields: [requestMessageId], references: [id])
   requestMessageId String
+  EmailTracker     EmailTracker[]
+}
 
+model EmailTracker {
+  id               String         @id @default(uuid())
+  reviewResponse   ReviewResponse @relation(fields: [reviewResponseId], references: [id])
+  reviewResponseId String
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @default(now())
+  ReviewRequest    ReviewRequest? @relation(fields: [reviewRequestId], references: [id])
+  reviewRequestId  String?
 }

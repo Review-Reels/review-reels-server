@@ -4,12 +4,6 @@ const { PrismaClient } = require("@prisma/client");
 
 const prisma = new PrismaClient();
 const auth = require("./VerifyToken");
-const { uploadToS3 } = require("../aws/s3");
-const {
-  createThumbNail,
-  removeLocalFile,
-} = require("../utils/createThumbNail");
-const fs = require("fs");
 
 const { upload } = require("../utils/upload");
 
@@ -62,7 +56,6 @@ router.post("/reviewResponse", async (req, res) => {
 
 router.put("/reviewResponse/:id", auth, async (req, res) => {
   const { body, user, params } = req;
-  const { isRead } = body;
 
   try {
     const currentReviewResponse = await prisma.reviewResponse.update({
@@ -70,7 +63,7 @@ router.put("/reviewResponse/:id", auth, async (req, res) => {
         id: params.id,
       },
       data: {
-        isRead,
+        ...body,
       },
     });
 
