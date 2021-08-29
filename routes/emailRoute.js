@@ -49,7 +49,7 @@ router.post("/sendMail", auth, async (req, res) => {
         },
       });
 
-      const emailTracker = await prisma.emailTracker.create({
+      const email = await prisma.emailTracker.create({
         data: {
           reviewResponseId: reviewResponse.id,
           reviewRequestId: reviewRequestId,
@@ -74,7 +74,7 @@ router.post("/sendMail", auth, async (req, res) => {
       await smtpTransport.sendMail(mailOptions);
       await prisma.emailTracker.update({
         where: {
-          id: emailTracker.id,
+          id: email.id,
         },
         data: {
           status: true,
