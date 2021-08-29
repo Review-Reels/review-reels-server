@@ -30,7 +30,6 @@ router.post("/sendMail", auth, async (req, res) => {
     const smtpTransport = nodemailer.createTransport(mg(mailgunAuth));
 
     const template = handlebars.compile(emailTemplateSource);
-    console.log(user);
 
     const reviewRequest = await prisma.reviewRequest.findUnique({
       where: {
@@ -38,7 +37,6 @@ router.post("/sendMail", auth, async (req, res) => {
       },
     });
 
-    let mailsToSend = [];
     sendTo.map(async (sender) => {
       const reviewResponse = await prisma.reviewResponse.create({
         data: {
@@ -50,6 +48,17 @@ router.post("/sendMail", auth, async (req, res) => {
           requestMessageId: reviewRequestId,
         },
       });
+
+      const emailTracker = await prisma.emailTracker.create({
+        data: {
+          reviewResponseId: reviewResponse.id,
+          reviewRequestId: reviewRequestId,
+          emailId: sender.email,
+          customerName: sender.customerName,
+          status: false,
+        },
+      });
+
       const htmlToSend = template({
         askMessage: reviewRequest.askMessage,
         reviewRequestUrl: `${process.env.WEB_APP_URL}${user.username}/${reviewResponse.id}`,
@@ -58,33 +67,20 @@ router.post("/sendMail", auth, async (req, res) => {
 
       const mailOptions = {
         from: `${user.username}@reviewreels.app`,
-        to: sender,
+        to: sender.email,
         subject: subject,
         html: htmlToSend,
       };
-      mailsToSend.push(smtpTransport.sendMail(mailOptions));
-    });
-
-    Promise.allSettled(mailsToSend).then((results) => {
-      let sendMails = [];
-      let errorMails = [];
-      console.log(results);
-      results.forEach(async (result, num) => {
-        console.log(result.status);
-        if (result.status == "fulfilled") {
-          await prisma.emailTracker.create({
-            data: {
-              reviewResponseId: reviewResponse.id,
-              reviewRequestId: reviewRequestId,
-            },
-          });
-          sendMails.push(sendTo[num]);
-        }
-        if (result.status == "rejected") {
-          errorMails.push(sendTo[num]);
-        }
+      await smtpTransport.sendMail(mailOptions);
+      await prisma.emailTracker.update({
+        where: {
+          id: emailTracker.id,
+        },
+        data: {
+          status: true,
+        },
       });
-      res.send({ message: "send email", sendMails, errorMails });
+      res.send({ message: "Emails Send" });
     });
   } catch (err) {
     console.log("Error", err);
