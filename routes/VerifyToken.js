@@ -19,6 +19,7 @@ module.exports = async function auth(req, res, next) {
         createdAt: true,
         authType: true,
         username: true,
+        merchantName: true,
       },
     });
     if (currentUser) {

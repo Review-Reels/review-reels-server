@@ -29,4 +29,13 @@ router.post("/update_user", auth, async (req, res) => {
   }
 });
 
+router.get("/getUser", auth, async (req, res) => {
+  try {
+    const { user } = req;
+    res.json({ ...user });
+  } catch (e) {
+    res.status(400).json({ message: e });
+  }
+});
+
 module.exports = router;
