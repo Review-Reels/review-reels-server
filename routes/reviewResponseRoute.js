@@ -74,6 +74,7 @@ router.put("/reviewResponse/:id", async (req, res) => {
         size,
         videoUrl: s3FileName + ".mp4",
         imageUrl: s3FileName + ".jpg",
+        isRead: false,
       };
     }
 
