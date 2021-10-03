@@ -57,8 +57,8 @@ router.post("/reviewResponse", async (req, res) => {
   }
 });
 
-router.put("/reviewResponse/:id", auth, async (req, res) => {
-  const { body, user, params, files } = req;
+router.put("/reviewResponse/:id", async (req, res) => {
+  const { body, params, files } = req;
   let dataTosend = { ...body };
   try {
     if (files && files.fileName) {
