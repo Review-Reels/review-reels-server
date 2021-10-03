@@ -79,6 +79,8 @@ router.put("/reviewResponse/:id", async (req, res) => {
         isRead: false,
       };
     }
+    const removeFields = ({ reviewRequestId, ...rest }) => rest;
+    dataTosend = removeFields(dataTosend);
     console.log("data to send", dataTosend);
     const currentReviewResponse = await prisma.reviewResponse.update({
       where: {
