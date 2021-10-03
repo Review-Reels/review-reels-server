@@ -58,8 +58,10 @@ router.post("/reviewResponse", async (req, res) => {
 });
 
 router.put("/reviewResponse/:id", async (req, res) => {
+  console.log("inside review Response");
   const { body, params, files } = req;
   let dataTosend = { ...body };
+  console.log("data to send", dataTosend);
   try {
     if (files && files.fileName) {
       const { data, size } = files.fileName;
@@ -77,7 +79,7 @@ router.put("/reviewResponse/:id", async (req, res) => {
         isRead: false,
       };
     }
-
+    console.log("data to send", dataTosend);
     const currentReviewResponse = await prisma.reviewResponse.update({
       where: {
         id: params.id,
@@ -89,7 +91,7 @@ router.put("/reviewResponse/:id", async (req, res) => {
 
     res.send(currentReviewResponse);
   } catch (e) {
-    console.log(e);
+    console.log("error in review update", e);
     res.status(400).json(e);
   }
 });
