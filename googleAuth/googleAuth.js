@@ -11,6 +11,8 @@ function verify(token) {
       process.env.CLIENT_ID,
       process.env.IOS_CLIENT_ID,
       process.env.ANDROID_CLIENT_ID,
+      process.env.ANDROID_STANDALONE,
+      process.env.IOS_STANDALONE,
     ],
   });
 }
