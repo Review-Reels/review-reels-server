@@ -6,6 +6,17 @@ const prisma = new PrismaClient();
 const auth = require("./VerifyToken");
 // const { uploadToS3, deleteFromS3 } = require("../aws/s3");
 const { upload } = require("../utils/upload");
+const ffmpeg = require("fluent-ffmpeg");
+const fs = require("fs");
+
+const AWS = require("aws-sdk");
+
+AWS.config.update({ region: process.env.AWS_REGION });
+const s3 = new AWS.S3({
+  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  signatureVersion: "v4",
+});
 
 router.get("/reviewRequest", auth, async (req, res) => {
   const { user } = req;
@@ -55,7 +66,43 @@ router.post("/reviewRequest", auth, async (req, res) => {
       res.send({ message: "You can only create one review request" });
     } else {
       const s3FileName = `${user.id}/${name}`;
-      await upload(s3FileName, data);
+      // await upload(s3FileName, data);
+      // stream = s3
+      //   .getObject(
+      //     {
+      //       Bucket: process.env.AWS_BUCKET_NAME,
+      //       Key:
+      //         "https://review-reels-videos.s3.ap-south-1.amazonaws.com/" +
+      //         s3FileName,
+      //     },
+      //     function (err, data) {
+      //       if (err) console.log(err, err.stack);
+      //       // an error occurred
+      //       else console.log(data); // successful response
+      //     }
+      //   )
+      //   .createReadStream();
+      fs.writeFile("test.mp4", data, function (err) {
+        if (err) return console.log(err);
+        console.log("file saved");
+      });
+      // downloadFile(
+      //   `./thumbnail/test.mp4`,
+      //   process.env.AWS_BUCKET_NAME,
+      //   `${s3FileName}.mp4`
+      // );
+
+      ffmpeg("test.mp4")
+        .on("end", function () {
+          console.log("Finished processing");
+        })
+        .videoCodec("libx264")
+        .toFormat("mp4")
+        .saveToFile("your_target.mp4", function (stdout, stderr) {
+          console.log("file has been converted succesfully");
+        });
+      const fileStream = fs.createReadStream("your_target.mp4");
+      await upload(s3FileName, fileStream);
 
       const currentReviewRequest = await prisma.reviewRequest.create({
         data: {
@@ -134,3 +181,15 @@ router.delete("/reviewRequest/:id", auth, async (req, res) => {
 });
 
 module.exports = router;
+
+const downloadFile = (filePath, bucketName, key) => {
+  const params = {
+    Bucket: bucketName,
+    Key: key,
+  };
+  s3.getObject(params, (err, data) => {
+    if (err) console.error(err);
+    fs.writeFileSync(filePath, data.Body.toString());
+    console.log(`${filePath} has been created!`);
+  });
+};
