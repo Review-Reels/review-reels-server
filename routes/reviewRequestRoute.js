@@ -93,16 +93,16 @@ router.post("/reviewRequest", auth, async (req, res) => {
       // );
 
       ffmpeg("test.mp4")
-        .on("end", function () {
+        .on("end", async function () {
           console.log("Finished processing");
+          const fileStream = fs.createReadStream("your_target.mp4");
+          await upload(s3FileName, fileStream);
         })
         .videoCodec("libx264")
         .toFormat("mp4")
         .saveToFile("your_target.mp4", function (stdout, stderr) {
           console.log("file has been converted succesfully");
         });
-      const fileStream = fs.createReadStream("your_target.mp4");
-      await upload(s3FileName, fileStream);
 
       const currentReviewRequest = await prisma.reviewRequest.create({
         data: {
