@@ -42,7 +42,7 @@ router.get("/reviewRequest/:username", async (req, res) => {
 router.post("/reviewRequest", auth, async (req, res) => {
   const { files, body, user } = req;
   const { data, size } = files.fileName;
-  const { askMessage } = body;
+  const { askMessage, platform } = body;
   const name = new Date().toISOString();
   console.log(data, size, name);
   try {
@@ -55,7 +55,7 @@ router.post("/reviewRequest", auth, async (req, res) => {
       res.send({ message: "You can only create one review request" });
     } else {
       const s3FileName = `${user.id}/${name}`;
-      await upload(s3FileName, data);
+      await upload(s3FileName, data, platform);
       const currentReviewRequest = await prisma.reviewRequest.create({
         data: {
           askMessage,
@@ -76,7 +76,7 @@ router.post("/reviewRequest", auth, async (req, res) => {
 
 router.put("/reviewRequest/:id", auth, async (req, res) => {
   const { files, body, user, params } = req;
-  const { askMessage } = body;
+  const { askMessage, platform } = body;
 
   try {
     const review = await prisma.reviewRequest.findUnique({
@@ -88,7 +88,7 @@ router.put("/reviewRequest/:id", auth, async (req, res) => {
       if (files && files.hasOwnProperty("fileName")) {
         let { data } = files.fileName;
         size = files.fileName.size;
-        await upload(s3FileName, data);
+        await upload(s3FileName, data, platform);
       }
 
       const currentReviewRequest = await prisma.reviewRequest.update({

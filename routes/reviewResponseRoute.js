@@ -33,11 +33,11 @@ router.get("/reviewResponse", auth, async (req, res) => {
 router.post("/reviewResponse", async (req, res) => {
   const { files, body } = req;
   const { data, size } = files.fileName;
-  const { whatYouDo, customerName, reviewRequestId } = body;
+  const { whatYouDo, customerName, reviewRequestId, platform } = body;
   const name = new Date().toISOString();
   const s3FileName = `${reviewRequestId}/${name}`;
   try {
-    await upload(s3FileName, data);
+    await upload(s3FileName, data, platform);
 
     const currentReviewResponse = await prisma.reviewResponse.create({
       data: {
@@ -65,10 +65,10 @@ router.put("/reviewResponse/:id", async (req, res) => {
   try {
     if (files && files.fileName) {
       const { data, size } = files.fileName;
-      const { whatYouDo, customerName, reviewRequestId } = body;
+      const { whatYouDo, customerName, reviewRequestId, platform } = body;
       const name = new Date().toISOString();
       const s3FileName = `${reviewRequestId}/${name}`;
-      await upload(s3FileName, data);
+      await upload(s3FileName, data, platform);
       dataTosend = {
         ...dataTosend,
         customerName,
