@@ -24,14 +24,14 @@ async function convertVideo(data) {
         reject();
       })
       .videoCodec("libx264")
-      .toFormat("mp4")
+      .toFormat("webm")
       .output(`./thumbnail/target_${fileName}`)
       .run();
   });
 }
 
 function downloadVideo(data) {
-  const fileName = `${nanoid()}.mp4`;
+  const fileName = `${nanoid()}.webm`;
   return new Promise((resolve, reject) => {
     fs.writeFile(`./thumbnail/${fileName}`, data, function (err) {
       if (err) reject();

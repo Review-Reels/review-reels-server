@@ -1,0 +1,18 @@
+version: "3.7"
+
+services:
+  web:
+    build: .
+    volumes:
+      - .:/usr/src/app/
+    expose:
+      - 3000
+    env_file:
+      - ./.env
+
+  nginx:
+    build: ./nginx
+    ports:
+      - 8000:3001
+    depends_on:
+      - web
