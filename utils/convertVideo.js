@@ -24,7 +24,6 @@ async function convertVideo(data) {
         reject();
       })
       .videoCodec("libx264")
-      .toFormat("webm")
       .output(`./thumbnail/target_${fileName}`)
       .run();
   });
