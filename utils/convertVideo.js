@@ -30,7 +30,7 @@ async function convertVideo(data) {
 }
 
 function downloadVideo(data) {
-  const fileName = `${nanoid()}.webm`;
+  const fileName = `${nanoid()}.mp4`;
   return new Promise((resolve, reject) => {
     fs.writeFile(`./thumbnail/${fileName}`, data, function (err) {
       if (err) reject();
