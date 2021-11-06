@@ -60,7 +60,7 @@ router.post("/reviewRequest", auth, async (req, res) => {
         data: {
           askMessage,
           size,
-          videoUrl: s3FileName + ".webm",
+          videoUrl: s3FileName + ".mp4",
           imageUrl: s3FileName + ".jpg",
           userId: user.id,
         },
@@ -84,7 +84,7 @@ router.put("/reviewRequest/:id", auth, async (req, res) => {
     });
     if (review) {
       let size = review.size;
-      const s3FileName = review.videoUrl.replace(".webm", "");
+      const s3FileName = review.videoUrl.replace(".mp4", "");
       if (files && files.hasOwnProperty("fileName")) {
         let { data } = files.fileName;
         size = files.fileName.size;
@@ -97,7 +97,7 @@ router.put("/reviewRequest/:id", auth, async (req, res) => {
         },
         data: {
           askMessage,
-          videoUrl: s3FileName + ".webm",
+          videoUrl: s3FileName + ".mp4",
           imageUrl: s3FileName + ".jpg",
           size,
           userId: user.id,

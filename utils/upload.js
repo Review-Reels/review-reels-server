@@ -16,7 +16,7 @@ const upload = (s3FileName, data, platform) => {
         const uploadResponse = await uploadToS3(
           s3FileName,
           convertedStream.fileStream,
-          ".webm"
+          ".mp4"
         );
         convertedStream.filePaths.map(async (path, index) => {
           if (index == 0) {
@@ -29,7 +29,7 @@ const upload = (s3FileName, data, platform) => {
         });
       } else {
         console.log(platform);
-        const uploadResponse = await uploadToS3(s3FileName, data, ".webm");
+        const uploadResponse = await uploadToS3(s3FileName, data, ".mp4");
         const thumbNailPath = await createThumbNail(uploadResponse);
         const fileStream = fs.createReadStream(thumbNailPath);
         await uploadToS3(s3FileName, fileStream, ".jpg");

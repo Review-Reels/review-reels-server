@@ -44,7 +44,7 @@ router.post("/reviewResponse", async (req, res) => {
         customerName,
         whatYouDo,
         size,
-        videoUrl: s3FileName + ".webm",
+        videoUrl: s3FileName + ".mp4",
         imageUrl: s3FileName + ".jpg",
         requestMessageId: reviewRequestId,
       },
@@ -74,7 +74,7 @@ router.put("/reviewResponse/:id", async (req, res) => {
         customerName,
         whatYouDo,
         size,
-        videoUrl: s3FileName + ".webm",
+        videoUrl: s3FileName + ".mp4",
         imageUrl: s3FileName + ".jpg",
         isRead: false,
       };

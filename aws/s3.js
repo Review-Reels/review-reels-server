@@ -7,7 +7,7 @@ const s3 = new AWS.S3({
   signatureVersion: "v4",
 });
 
-const uploadToS3 = (fileName, fileContent, fileExtension = ".webm") => {
+const uploadToS3 = (fileName, fileContent, fileExtension = ".mp4") => {
   const params = {
     Bucket: process.env.AWS_BUCKET_NAME,
     Key: fileName + fileExtension,
