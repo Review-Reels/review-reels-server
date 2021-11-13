@@ -6,6 +6,7 @@ const prisma = new PrismaClient();
 const auth = require("./VerifyToken");
 
 const { upload } = require("../utils/upload");
+const { sendEmail } = require("../utils/sendEmail");
 
 router.get("/reviewResponse", auth, async (req, res) => {
   const { user } = req;
@@ -49,6 +50,29 @@ router.post("/reviewResponse", async (req, res) => {
         requestMessageId: reviewRequestId,
       },
     });
+    console.log(reviewRequestId);
+    const reviewRequestUserId = await prisma.reviewRequest.findUnique({
+      where: { id: reviewRequestId },
+      include: {
+        user: {
+          select: {
+            email: true,
+          },
+        },
+      },
+    });
+
+    const subject = "Review Response Received";
+    const mailOptions = {
+      from: `admin@reviewreels.app`,
+      to: reviewRequestUserId.user.email,
+      subject: subject,
+    };
+    const templateValues = {
+      responseUserName: customerName,
+      imageUrl: `${process.env.S3_URL}${currentReviewResponse.imageUrl}`,
+    };
+    await sendEmail("/reviewResponseTemplate.hbs", mailOptions, templateValues);
 
     res.send(currentReviewResponse);
   } catch (e) {
@@ -82,6 +106,7 @@ router.put("/reviewResponse/:id", async (req, res) => {
     const removeFields = ({ reviewRequestId, platform, ...rest }) => rest;
     dataTosend = removeFields(dataTosend);
     console.log("data to send", dataTosend);
+
     const currentReviewResponse = await prisma.reviewResponse.update({
       where: {
         id: params.id,

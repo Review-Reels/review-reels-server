@@ -1,35 +1,15 @@
-const nodemailer = require("nodemailer");
-const mg = require("nodemailer-mailgun-transport");
-const handlebars = require("handlebars");
-const fs = require("fs");
-const path = require("path");
-
 const router = require("express").Router();
 
 const { PrismaClient } = require("@prisma/client");
 
 const prisma = new PrismaClient();
 const auth = require("./VerifyToken");
-
-const emailTemplateSource = fs.readFileSync(
-  path.join(__dirname, "/template.hbs"),
-  "utf8"
-);
-
-const mailgunAuth = {
-  auth: {
-    api_key: process.env.MAIL_GUN_API_KEY,
-    domain: process.env.MAIL_GUN_DOMAIN,
-  },
-};
+const { sendEmail } = require("../utils/sendEmail");
 
 router.post("/sendMail", auth, async (req, res) => {
   try {
     const { user } = req;
     const { subject, sendTo, reviewRequestId } = req.body;
-    const smtpTransport = nodemailer.createTransport(mg(mailgunAuth));
-
-    const template = handlebars.compile(emailTemplateSource);
 
     const reviewRequest = await prisma.reviewRequest.findUnique({
       where: {
@@ -58,20 +38,17 @@ router.post("/sendMail", auth, async (req, res) => {
           status: false,
         },
       });
-
-      const htmlToSend = template({
-        askMessage: reviewRequest.askMessage,
-        reviewRequestUrl: `${process.env.WEB_APP_URL}${user.username}/${reviewResponse.id}`,
-        imageUrl: `${process.env.S3_URL}${reviewRequest.imageUrl}`,
-      });
-
       const mailOptions = {
         from: `${user.username}@reviewreels.app`,
         to: sender.email,
         subject: subject,
-        html: htmlToSend,
       };
-      await smtpTransport.sendMail(mailOptions);
+      const templateValues = {
+        askMessage: reviewRequest.askMessage,
+        reviewRequestUrl: `${process.env.WEB_APP_URL}${user.username}/${reviewResponse.id}`,
+        imageUrl: `${process.env.S3_URL}${reviewRequest.imageUrl}`,
+      };
+      await sendEmail("/template.hbs", mailOptions, templateValues);
       await prisma.emailTracker.update({
         where: {
           id: email.id,
