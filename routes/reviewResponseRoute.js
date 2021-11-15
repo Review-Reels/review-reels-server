@@ -124,7 +124,7 @@ router.put("/reviewResponse/:id", async (req, res) => {
       const templateValues = {
         merchantName: reviewRequestUserId.user.merchantName,
         responseUserName: customerName,
-        imageUrl: `${process.env.S3_URL}${currentReviewResponse.imageUrl}`,
+        imageUrl: `${process.env.S3_URL}${dataTosend.imageUrl}`,
       };
       await sendEmail(
         "/reviewResponseTemplate.hbs",
