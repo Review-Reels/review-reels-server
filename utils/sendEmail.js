@@ -21,7 +21,7 @@ function sendEmail(templateName, mailOptions, templateValues) {
 
   const template = handlebars.compile(emailTemplateSource);
   const htmlToSend = template(templateValues);
-
+  console.log("in send email");
   return smtpTransport.sendMail({ ...mailOptions, html: htmlToSend });
 }
 

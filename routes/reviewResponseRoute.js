@@ -50,25 +50,26 @@ router.post("/reviewResponse", async (req, res) => {
         requestMessageId: reviewRequestId,
       },
     });
-    console.log(reviewRequestId);
     const reviewRequestUserId = await prisma.reviewRequest.findUnique({
       where: { id: reviewRequestId },
       include: {
         user: {
           select: {
             email: true,
+            merchantName: true,
           },
         },
       },
     });
 
-    const subject = "Review Response Received";
+    const subject = `You received a new review video from ${customerName} !!!`;
     const mailOptions = {
-      from: `admin@reviewreels.app`,
+      from: `no-reply@reviewreels.app`,
       to: reviewRequestUserId.user.email,
       subject: subject,
     };
     const templateValues = {
+      merchantName: reviewRequestUserId.user.merchantName,
       responseUserName: customerName,
       imageUrl: `${process.env.S3_URL}${currentReviewResponse.imageUrl}`,
     };
@@ -102,6 +103,34 @@ router.put("/reviewResponse/:id", async (req, res) => {
         imageUrl: s3FileName + ".jpg",
         isRead: false,
       };
+      const reviewRequestUserId = await prisma.reviewRequest.findUnique({
+        where: { id: reviewRequestId },
+        include: {
+          user: {
+            select: {
+              email: true,
+              merchantName: true,
+            },
+          },
+        },
+      });
+
+      const subject = `You received a new review video from ${customerName} !!!`;
+      const mailOptions = {
+        from: `no-reply@reviewreels.app`,
+        to: reviewRequestUserId.user.email,
+        subject: subject,
+      };
+      const templateValues = {
+        merchantName: reviewRequestUserId.user.merchantName,
+        responseUserName: customerName,
+        imageUrl: `${process.env.S3_URL}${currentReviewResponse.imageUrl}`,
+      };
+      await sendEmail(
+        "/reviewResponseTemplate.hbs",
+        mailOptions,
+        templateValues
+      );
     }
     const removeFields = ({ reviewRequestId, platform, ...rest }) => rest;
     dataTosend = removeFields(dataTosend);

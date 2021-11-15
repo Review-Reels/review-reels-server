@@ -2,97 +2,41 @@
   <head>
     <title>Review Response</title>
   </head>
+
   <body>
-    <table
+    <div>
+      <p>Hello {{merchantName}},</p>
+    </div>
+    <img
+      src="{{imageUrl}}"
       style="
         background: #f2f2f2;
         border-radius: 16px;
-        width: 327px;
-        height: 560px;
-        margin-left: auto;
-        margin-right: auto;
+        width: 231px;
+        height: 330px;
       "
-    >
-      <tr>
-        <th>
-          <table
-            style="
-              width: 279px;
-              height: 512px;
-              background: #ffffff;
-              box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.05);
-              border-radius: 16px;
-              margin-left: auto;
-              margin-right: auto;
-              padding: 16px;
-              text-align: center;
-            "
-          >
-            <tr>
-              <td>
-                <img
-                  src="{{imageUrl}}"
-                  style="
-                    background: #f2f2f2;
-                    border-radius: 16px;
-                    width: 231px;
-                    height: 272px;
-                  "
-                />
-              </td>
-            </tr>
-            <tr>
-              <td>
-                <span
-                  style="
-                    font-family: Karla;
-                    font-style: normal;
-                    font-weight: normal;
-                    font-size: 16px;
-                    line-height: 24px;
-                    text-align: justify;
-                    text-justify: inter-word;
-                  "
-                  >{{responseUserName}} just send you a review response. please open Review Reels app to view.
-                  </span>
-              </td>
-            </tr>
-            {{!-- <tr>
-              <td
-                style="
-                  width: 231px;
-                  height: 48px;
-                  background: #ee2737;
-                  box-shadow: 0px 4px 4px rgba(238, 39, 55, 0.1);
-                  border-radius: 64px;
-                  text-align: center;
-                "
-              >
-                <a href="{{reviewRequestUrl}}" style="text-decoration: none">
-                   <img
-                    style="width: 18px; height: 12px"
-                    src="https://reviewreels-asset.s3.ap-south-1.amazonaws.com/video-icon.png"
-                  />
-                  <span
-                    style="
-                      font-family: Karla;
-                      font-style: normal;
-                      font-weight: bold;
-                      font-size: 16px;
-                      line-height: 24px;
-                      text-align: center;
-                      color: #ffffff;
-                      margin-left: 11px;
-                    "
-                  >
-                    View Request</span
-                  >
-                </a>
-              </td>
-            </tr> --}}
-          </table>
-        </th>
-      </tr>
-    </table>
+    />
+    <div>
+      <p>
+        You have received a new review video from {{responseUserName}}. Please log onto
+        ReviewReels app to view/download the video.
+      </p>
+    </div>
+    <div>
+      <p>Next steps:</p>
+      <ol>
+        <li>
+          Thank the customer who sent this review video :) Good deeds should be
+          rewarded.
+        </li>
+        <li>
+          Publish the video on all your social media channels by downloading it
+          from ReviewReels app.
+        </li>
+        <li>Embed the video on your website :)</li>
+      </ol>
+      <p>Regards</p>
+      <p>ReviewReels Team</p>
+    </div>
   </body>
 </html>
