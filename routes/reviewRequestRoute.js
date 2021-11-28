@@ -29,6 +29,13 @@ router.get("/reviewRequest/:username", async (req, res) => {
 
   try {
     const currentReviewRequest = await prisma.reviewRequest.findMany({
+      include: {
+        user: {
+          select: {
+            merchantName: true,
+          },
+        },
+      },
       where: {
         user: { username: params.username },
       },
@@ -55,7 +62,7 @@ router.post("/reviewRequest", auth, async (req, res) => {
       res.send({ message: "You can only create one review request" });
     } else {
       const s3FileName = `${user.id}/${name}`;
-      await upload(s3FileName, data, platform);
+      // await upload(s3FileName, data, platform);
       const currentReviewRequest = await prisma.reviewRequest.create({
         data: {
           askMessage,
