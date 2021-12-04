@@ -1,0 +1,21 @@
+version: "3.7"
+
+services:
+  web:
+    build: .
+    volumes:
+      - .:/usr/src/app/
+    expose:
+      - 3000
+    env_file:
+      - ./.env
+
+  nginx:
+    build: ./nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - web
+    volumes:
+      - /home/ubuntu/cert/:/etc/cert/

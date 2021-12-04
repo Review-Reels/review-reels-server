@@ -17,9 +17,16 @@ app.use(express.json());
 
 //import routes
 const authRoute = require("./routes/AuthRoute");
-const uploadRoute = require("./routes/uploadVideoRoute");
-//route middleware
-app.use("/api/user", authRoute);
-app.use("/api/upload", uploadRoute);
+const userRoute = require("./routes/UserRoute");
+const reviewRequestRoute = require("./routes/reviewRequestRoute");
+const reviewResponseRoute = require("./routes/reviewResponseRoute");
+const emailRoute = require("./routes/emailRoute");
 
-app.listen(3000, () => console.log("Server Started!"));
+//route middleware
+app.use("/api/auth", authRoute);
+app.use("/api/user", userRoute);
+app.use("/api/review", reviewRequestRoute);
+app.use("/api/review", reviewResponseRoute);
+app.use("/api/email", emailRoute);
+
+app.listen(process.env.PORT, () => console.log("Server Started!"));
