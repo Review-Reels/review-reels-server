@@ -24,4 +24,6 @@ RUN apt-get update
 RUN apt-get clean
 RUN apt-get install -y ffmpeg
 
+RUN mkdir thumbnail
+
 CMD npm start
