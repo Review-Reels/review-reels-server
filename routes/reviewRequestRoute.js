@@ -62,7 +62,7 @@ router.post("/reviewRequest", auth, async (req, res) => {
       res.send({ message: "You can only create one review request" });
     } else {
       const s3FileName = `${user.id}/${name}`;
-      // await upload(s3FileName, data, platform);
+      await upload(s3FileName, data, platform);
       const currentReviewRequest = await prisma.reviewRequest.create({
         data: {
           askMessage,
