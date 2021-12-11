@@ -31,7 +31,7 @@ router.post("/signin", async (req, res) => {
       where: { email: signIn.email },
     });
     if (user) {
-      if (bcrypt.compare(signIn.password, user.password)) {
+      if (await bcrypt.compare(signIn.password, user.password)) {
         //create and assign a token
         const token = jwt.sign({ _id: user.id }, process.env.TOKEN_SECRET, {
           expiresIn: "7d",
@@ -39,11 +39,13 @@ router.post("/signin", async (req, res) => {
         const removeFields = ({ password, ...rest }) => rest;
 
         res.json({ Authorization: token, ...removeFields(user) });
-      } else res.json({ message: "Password wrong" });
-    } else res.json({ message: "User does not exist" });
+      } else res.status(400).json({ message: "Password wrong" });
+    } else res.status(400).json({ message: "User does not exist" });
   } catch (e) {
     console.log(e);
-    res.json({ message: "Something went wrong! Please try again later" });
+    res
+      .status(400)
+      .json({ message: "Something went wrong! Please try again later" });
   }
 });
 
