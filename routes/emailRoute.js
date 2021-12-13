@@ -45,7 +45,7 @@ router.post("/sendMail", auth, async (req, res) => {
       };
       const templateValues = {
         askMessage: reviewRequest.askMessage,
-        reviewRequestUrl: `${process.env.WEB_APP_URL}${user.username}/${reviewResponse.id}`,
+        reviewRequestUrl: `${process.env.WEB_APP_URL}view/${user.username}/${reviewResponse.id}`,
         imageUrl: `${process.env.S3_URL}${reviewRequest.imageUrl}`,
       };
       await sendEmail("/template.hbs", mailOptions, templateValues);
