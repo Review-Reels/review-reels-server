@@ -58,7 +58,7 @@ router.post("/google_sign_in", async (req, res) => {
     if (verifiedUser) {
       const userData = {
         ...verifiedUser,
-        username: "",
+        username: null,
         authType: "google",
       };
       let user = await prisma.user.findUnique({
