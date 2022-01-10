@@ -55,8 +55,8 @@ model ReviewResponse {
 model EmailTracker {
   id               String         @id @default(uuid())
   emailId          String
-  customerName     String         @default("")
-  subject          String?
+  customerName     String
+  subject          String?        @default("")
   status           Boolean
   createdAt        DateTime       @default(now())
   updatedAt        DateTime       @default(now())

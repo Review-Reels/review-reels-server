@@ -82,14 +82,15 @@ router.post("/reSendMail", auth, async (req, res) => {
           id: email.reviewRequestId,
         },
       });
-      const reviewResponse = await prisma.reviewRequest.findUnique({
+      const reviewResponse = await prisma.reviewResponse.findUnique({
         where: {
           id: email.reviewResponseId,
         },
       });
+      console.log(reviewRequest, reviewResponse);
       const mailOptions = {
         from: `${user.username}@reviewreels.app`,
-        to: email.email,
+        to: email.emailId,
         subject: email.subject,
       };
       const templateValues = {
@@ -107,6 +108,9 @@ router.post("/reSendMail", auth, async (req, res) => {
         },
       });
       res.send({ message: "Emails Send" });
+    } else {
+      console.log("Error", "Email entry does'nt exist");
+      res.send({ message: "Some Error occured" });
     }
   } catch (err) {
     console.log("Error", err);
