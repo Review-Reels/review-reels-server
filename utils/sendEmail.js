@@ -12,17 +12,21 @@ const mailgunAuth = {
 };
 
 function sendEmail(templateName, mailOptions, templateValues) {
-  const emailTemplateSource = fs.readFileSync(
-    path.join(__dirname, templateName),
-    "utf8"
-  );
+  try {
+    const emailTemplateSource = fs.readFileSync(
+      path.join(__dirname, templateName),
+      "utf8"
+    );
 
-  const smtpTransport = nodemailer.createTransport(mg(mailgunAuth));
+    const smtpTransport = nodemailer.createTransport(mg(mailgunAuth));
 
-  const template = handlebars.compile(emailTemplateSource);
-  const htmlToSend = template(templateValues);
-  console.log("in send email");
-  return smtpTransport.sendMail({ ...mailOptions, html: htmlToSend });
+    const template = handlebars.compile(emailTemplateSource);
+    const htmlToSend = template(templateValues);
+    console.log("in send email");
+    return smtpTransport.sendMail({ ...mailOptions, html: htmlToSend });
+  } catch (err) {
+    res.send({ message: "Some Error occured", err });
+  }
 }
 
 module.exports = { sendEmail };
