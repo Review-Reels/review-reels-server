@@ -40,7 +40,7 @@ router.post("/sendMail", auth, async (req, res) => {
         },
       });
       const mailOptions = {
-        from: `${user.username}@reviewreels.app`,
+        from: `no-reply@reviewreels.app`,
         to: sender.email,
         subject: subject,
       };
@@ -89,7 +89,7 @@ router.post("/reSendMail", auth, async (req, res) => {
       });
       console.log(reviewRequest, reviewResponse);
       const mailOptions = {
-        from: `${user.username}@reviewreels.app`,
+        from: `no-reply@reviewreels.app`,
         to: email.emailId,
         subject: email.subject,
       };
