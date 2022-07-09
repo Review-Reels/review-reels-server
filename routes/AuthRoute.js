@@ -54,10 +54,11 @@ router.post("/google_sign_in", async (req, res) => {
   const userObj = req.body;
   try {
     const verifiedUser = await verifyAndGetUser(userObj.idToken);
-    console.log(verifiedUser);
+
     if (verifiedUser) {
+      const removeFieldsNbf = ({ nbf, ...rest }) => rest;
       const userData = {
-        ...verifiedUser,
+        ...removeFieldsNbf({ ...verifiedUser }),
         authType: "google",
       };
       let user = await prisma.user.findUnique({
@@ -77,8 +78,9 @@ router.post("/google_sign_in", async (req, res) => {
     } else {
       res.json({ message: "Cannot verify user" });
     }
-  } catch (e) {
-    console.log(e);
+  } catch (error) {
+    console.log(error, "google_sign_in");
+    res.json({ message: "Something went wrong!" });
   }
 });
 
