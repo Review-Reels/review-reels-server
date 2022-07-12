@@ -12,13 +12,15 @@ const createThumbNail = (fileContent) => {
       .on("end", () => {
         resolve(`${path}/${fileName}`);
       })
-      .on("error", () => {
+      .on("error", (err) => {
+        console.log(err);
         reject();
       })
       .takeScreenshots(
         {
           count: 1,
           filename: fileName,
+          timemarks: ["1"],
         },
         path
       );
