@@ -7,7 +7,8 @@ datasource db {
 }
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["referentialActions"]
 }
 
 model User {
@@ -48,21 +49,21 @@ model ReviewResponse {
   createdAt        DateTime       @default(now())
   updatedAt        DateTime       @default(now())
   isRead           Boolean        @default(false)
-  requestMessage   ReviewRequest  @relation(fields: [requestMessageId], references: [id])
+  requestMessage   ReviewRequest  @relation(fields: [requestMessageId], references: [id], onDelete: Cascade)
   requestMessageId String
   EmailTracker     EmailTracker[]
 }
 
 model EmailTracker {
-  id               String         @id @default(uuid())
+  id               String          @id @default(uuid())
   emailId          String
   customerName     String
-  subject          String?        @default("")
+  subject          String?         @default("")
   status           Boolean
-  createdAt        DateTime       @default(now())
-  updatedAt        DateTime       @default(now())
-  reviewResponse   ReviewResponse @relation(fields: [reviewResponseId], references: [id])
-  reviewResponseId String
-  ReviewRequest    ReviewRequest? @relation(fields: [reviewRequestId], references: [id])
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @default(now())
+  reviewResponse   ReviewResponse? @relation(fields: [reviewResponseId], references: [id], onDelete: SetNull)
+  reviewResponseId String?
+  ReviewRequest    ReviewRequest?  @relation(fields: [reviewRequestId], references: [id], onDelete: SetNull)
   reviewRequestId  String?
 }

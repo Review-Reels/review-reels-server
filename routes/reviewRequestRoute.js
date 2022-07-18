@@ -6,6 +6,7 @@ const prisma = new PrismaClient();
 const auth = require("./VerifyToken");
 
 const { upload } = require("../utils/upload");
+const { deleteFromS3 } = require("../aws/s3");
 
 router.get("/reviewRequest", auth, async (req, res) => {
   const { user } = req;
@@ -15,6 +16,7 @@ router.get("/reviewRequest", auth, async (req, res) => {
       where: {
         userId: user.id,
       },
+      orderBy: { createdAt: "desc" },
     });
     res.send(currentReviewRequest);
   } catch (e) {
@@ -71,7 +73,13 @@ router.get("/reviewRequest/requestId=:requestId", async (req, res) => {
 
 router.post("/reviewRequest", auth, async (req, res) => {
   const { files, body, user } = req;
-  const { data, size } = files.fileName;
+  let data = null;
+  let size = 0;
+  if (files && files.fileName) {
+    const { data: fileData, size: fileSize } = files.fileName;
+    data = fileData;
+    size = fileSize;
+  }
   const { askMessage, extension, name } = body;
   const fileName = new Date().toISOString();
   console.log(data, size, name);
@@ -84,20 +92,34 @@ router.post("/reviewRequest", auth, async (req, res) => {
     // if (existingRequests) {
     //   res.send({ message: "You can only create one review request" });
     // } else {
-    const s3FileName = `${user.id}/${fileName}`;
-    await upload(s3FileName, data, extension);
-    const currentReviewRequest = await prisma.reviewRequest.create({
-      data: {
-        name,
-        askMessage,
-        size,
-        videoUrl: s3FileName + extension,
-        imageUrl: s3FileName + ".jpg",
-        userId: user.id,
-      },
-    });
+    if (data) {
+      const s3FileName = `${user.id}/${fileName}`;
+      await upload(s3FileName, data, extension);
+      const currentReviewRequest = await prisma.reviewRequest.create({
+        data: {
+          name,
+          askMessage,
+          size,
+          videoUrl: s3FileName + extension,
+          imageUrl: s3FileName + ".jpg",
+          userId: user.id,
+        },
+      });
+      res.send(currentReviewRequest);
+    } else {
+      const currentReviewRequest = await prisma.reviewRequest.create({
+        data: {
+          name,
+          askMessage,
+          size,
+          videoUrl: "",
+          imageUrl: "",
+          userId: user.id,
+        },
+      });
+      res.send(currentReviewRequest);
+    }
 
-    res.send(currentReviewRequest);
     // }
   } catch (e) {
     console.log(e, "error");
@@ -145,18 +167,17 @@ router.put("/reviewRequest/:id", auth, async (req, res) => {
 });
 
 router.delete("/reviewRequest/:id", auth, async (req, res) => {
-  const { params } = req;
-
   try {
+    const { params } = req;
     const currentReviewRequest = await prisma.reviewRequest.delete({
       where: {
         id: params.id,
       },
     });
     const s3FileName = currentReviewRequest.videoUrl;
-    const uploadResponse = await deleteFromS3(s3FileName);
+    if (s3FileName !== "") await deleteFromS3(s3FileName);
 
-    res.status(201);
+    res.status(201).send({});
   } catch (e) {
     console.log(e);
     res.status(400).json(e);
