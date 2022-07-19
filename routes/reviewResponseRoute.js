@@ -32,24 +32,50 @@ router.get("/reviewResponse", auth, async (req, res) => {
 });
 
 router.post("/reviewResponse", async (req, res) => {
-  const { files, body } = req;
-  const { data, size } = files.fileName;
-  const { whatYouDo, customerName, reviewRequestId, platform } = body;
-  const name = new Date().toISOString();
-  const s3FileName = `${reviewRequestId}/${name}`;
   try {
-    await upload(s3FileName, data, platform);
-
-    const currentReviewResponse = await prisma.reviewResponse.create({
-      data: {
-        customerName,
-        whatYouDo,
-        size,
-        videoUrl: s3FileName + ".mp4",
-        imageUrl: s3FileName + ".jpg",
-        requestMessageId: reviewRequestId,
-      },
-    });
+    const { files, body } = req;
+    let data = null;
+    let size = 0;
+    if (files && files.fileName) {
+      const { data: fileData, size: fileSize } = files.fileName;
+      data = fileData;
+      size = fileSize;
+    }
+    const {
+      whatYouDo,
+      customerName,
+      reviewRequestId,
+      extension,
+      replyMessage,
+    } = body;
+    const name = new Date().toISOString();
+    const s3FileName = `${reviewRequestId}/${name}`;
+    let currentReviewResponse = null;
+    if (data) {
+      await upload(s3FileName, data, extension);
+      currentReviewResponse = await prisma.reviewResponse.create({
+        data: {
+          customerName,
+          whatYouDo,
+          size,
+          videoUrl: s3FileName + ".mp4",
+          imageUrl: s3FileName + ".jpg",
+          requestMessageId: reviewRequestId,
+        },
+      });
+    } else {
+      currentReviewResponse = await prisma.reviewResponse.create({
+        data: {
+          customerName,
+          replyMessage,
+          whatYouDo,
+          size,
+          videoUrl: "",
+          imageUrl: "",
+          requestMessageId: reviewRequestId,
+        },
+      });
+    }
     const reviewRequestUserId = await prisma.reviewRequest.findUnique({
       where: { id: reviewRequestId },
       include: {
