@@ -58,7 +58,7 @@ router.post("/reviewResponse", async (req, res) => {
           customerName,
           whatYouDo,
           size,
-          videoUrl: s3FileName + ".mp4",
+          videoUrl: s3FileName + extension,
           imageUrl: s3FileName + ".jpg",
           requestMessageId: reviewRequestId,
         },
@@ -108,6 +108,7 @@ router.post("/reviewResponse", async (req, res) => {
   }
 });
 
+//for email
 router.put("/reviewResponse/:id", async (req, res) => {
   console.log("inside review Response");
   const { body, params, files } = req;
