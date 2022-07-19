@@ -41,7 +41,7 @@ model ReviewRequest {
 
 model ReviewResponse {
   id               String         @id @default(uuid())
-  replyMessage     String?
+  replyMessage     String?        @db.VarChar(500)
   customerName     String
   whatYouDo        String?
   videoUrl         String
