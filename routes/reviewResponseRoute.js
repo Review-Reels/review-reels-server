@@ -10,10 +10,23 @@ const { sendEmail } = require("../utils/sendEmail");
 
 router.get("/reviewResponse", auth, async (req, res) => {
   const { user } = req;
+  const { requestId, searchValue } = req.query;
+
+  const extraWhere = requestId ? { requestMessageId: requestId } : {};
+  const searchQuery = searchValue
+    ? {
+        OR: [
+          { customerName: { contains: searchValue } },
+          { whatYouDo: { contains: searchValue } },
+        ],
+      }
+    : {};
   try {
     const currentReviewResponse = await prisma.reviewResponse.findMany({
       where: {
         requestMessage: { userId: user.id },
+        ...extraWhere,
+        ...searchQuery,
       },
       include: {
         EmailTracker: true,
