@@ -44,6 +44,26 @@ router.get("/reviewResponse", auth, async (req, res) => {
   }
 });
 
+//video Embed without auth
+router.get("/embedReviewResponse", async (req, res) => {
+  try {
+    const { responseId } = req.query;
+
+    const currentReviewResponse = await prisma.reviewResponse.findUnique({
+      where: {
+        id: responseId,
+      },
+      include: {
+        requestMessage: true,
+      },
+    });
+    res.send(currentReviewResponse);
+  } catch (e) {
+    console.log(e);
+    res.status(400).json(e);
+  }
+});
+
 router.post("/reviewResponse", async (req, res) => {
   try {
     const { files, body } = req;
