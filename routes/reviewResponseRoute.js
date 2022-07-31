@@ -64,6 +64,23 @@ router.get("/embedReviewResponse", async (req, res) => {
   }
 });
 
+router.get("/unReadStatistics", auth, async (req, res) => {
+  try {
+    const { user } = req;
+
+    const unReadCount = await prisma.reviewResponse.count({
+      where: {
+        requestMessage: { userId: user.id },
+        isRead: false,
+      },
+    });
+    res.send({ unReadCount });
+  } catch (e) {
+    console.log(e);
+    res.status(400).json(e);
+  }
+});
+
 router.post("/reviewResponse", async (req, res) => {
   try {
     const { files, body } = req;
