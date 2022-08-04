@@ -68,3 +68,37 @@ model EmailTracker {
   ReviewRequest    ReviewRequest?  @relation(fields: [reviewRequestId], references: [id], onDelete: SetNull)
   reviewRequestId  String?
 }
+
+model Subscription {
+  id                        String  @id @default(uuid())
+  seller_id                 String
+  product_id                String
+  product_name              String
+  permalink                 String
+  product_permalink         String
+  short_product_id          String
+  email                     String
+  price                     String
+  gumroad_fee               String
+  currency                  String
+  quantity                  String
+  discover_fee_charged      String
+  can_contact               String
+  referrer                  String
+  card                      Json
+  order_number              String
+  sale_id                   String
+  sale_timestamp            String
+  purchaser_id              String
+  subscription_id           String
+  url_params                Json?
+  variants                  Json
+  test                      String
+  ip_country                String
+  recurrence                String
+  is_gift_receiver_purchase String
+  refunded                  String
+  resource_name             String?
+  disputed                  String
+  dispute_won               String
+}
