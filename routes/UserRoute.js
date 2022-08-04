@@ -6,7 +6,7 @@ const prisma = new PrismaClient();
 const auth = require("./VerifyToken");
 
 //update user name and other info
-router.post("/update_user", auth, async (req, res) => {
+router.post("/updateUser", auth, async (req, res) => {
   const { user } = req;
   const userObj = req.body;
   console.log(userObj);
