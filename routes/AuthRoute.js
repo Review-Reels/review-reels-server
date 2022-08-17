@@ -5,6 +5,8 @@ const jwt = require("jsonwebtoken");
 const { PrismaClient } = require("@prisma/client");
 
 const verifyAndGetUser = require("../googleAuth/googleAuth");
+const { nanoid } = require("nanoid");
+const { sendEmail } = require("../utils/sendEmail");
 const prisma = new PrismaClient();
 //sign in route
 router.post("/signup", async (req, res) => {
@@ -14,12 +16,55 @@ router.post("/signup", async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     userObj.password = await bcrypt.hash(userObj.password, salt);
     userData = { ...userObj };
-    const user = await prisma.user.create({ data: userData });
+    const emailVerifyHash = nanoid();
+    const user = await prisma.user.create({
+      data: { ...userData, emailVerifyHash },
+    });
     const removeFields = ({ password, ...rest }) => rest;
+
+    const subject = `Review Reels email verify link ${userObj.merchantName}`;
+    const mailOptions = {
+      from: `no-reply@reviewreels.app`,
+      to: userObj.email,
+      subject: subject,
+    };
+    const templateValues = {
+      merchantName: userObj.merchantName,
+      emailVerifyLink: `${process.env.WEB_APP_URL}verify/${userData.email}/${emailVerifyHash}`,
+    };
+    await sendEmail("/emailVerify.hbs", mailOptions, templateValues);
     res.json(removeFields(user));
   } catch (e) {
     console.log(e);
     res.status(400).json({ message: e.meta.target });
+  }
+});
+
+router.post("/verifyEmail", async (req, res) => {
+  const { email, verifyHash } = req.body;
+  try {
+    const user = await prisma.user.findUnique({
+      where: { email: email },
+    });
+    if (user) {
+      if (verifyHash === user.emailVerifyHash) {
+        await prisma.user.update({
+          where: { email: email },
+          data: {
+            emailVerified: true,
+          },
+        });
+        res.json({ message: "Verified" });
+      } else
+        res.status(400).json({
+          message: "Cannot verify please generate a new verify email",
+        });
+    } else res.status(400).json({ message: "This link is expired" });
+  } catch (e) {
+    console.log(e);
+    res
+      .status(400)
+      .json({ message: "Something went wrong! Please try again later" });
   }
 });
 
