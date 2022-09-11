@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE `User` ADD COLUMN `passwordResetHash` VARCHAR(191) NOT NULL DEFAULT '',
+    ADD COLUMN `passwordResetHashTimeStamp` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3);

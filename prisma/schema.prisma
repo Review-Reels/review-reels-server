@@ -12,18 +12,20 @@ generator client {
 }
 
 model User {
-  id              String          @id @default(uuid())
-  email           String          @unique
-  username        String?         @unique
-  merchantName    String          @default("")
-  name            String?
-  password        String?
-  picture         String?
-  authType        String          @default("native")
-  emailVerified   Boolean         @default(false)
-  createdAt       DateTime        @default(now())
-  emailVerifyHash String          @default("")
-  ReviewRequest   ReviewRequest[]
+  id                         String          @id @default(uuid())
+  email                      String          @unique
+  username                   String?         @unique
+  merchantName               String          @default("")
+  name                       String?
+  password                   String?
+  picture                    String?
+  authType                   String          @default("native")
+  emailVerified              Boolean         @default(false)
+  createdAt                  DateTime        @default(now())
+  emailVerifyHash            String          @default("")
+  passwordResetHash          String          @default("")
+  passwordResetHashTimeStamp DateTime        @default(now())
+  ReviewRequest              ReviewRequest[]
 }
 
 model ReviewRequest {

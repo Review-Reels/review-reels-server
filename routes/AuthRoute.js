@@ -67,6 +67,74 @@ router.post("/verifyEmail", async (req, res) => {
       .json({ message: "Something went wrong! Please try again later" });
   }
 });
+router.post("/sendResetPasswordEmail", async (req, res) => {
+  const { email } = req.body;
+  try {
+    const user = await prisma.user.findUnique({
+      where: { email: email },
+    });
+    if (user) {
+      const subject = `Review Reels reset password ${user.merchantName}`;
+      const mailOptions = {
+        from: `no-reply@reviewreels.app`,
+        to: email,
+        subject: subject,
+      };
+      const passwordResetHash = nanoid();
+      await prisma.user.update({
+        where: { email: email },
+        data: {
+          passwordResetHash,
+          passwordResetHashTimeStamp: new Date().toISOString(),
+        },
+      });
+      const templateValues = {
+        merchantName: user.merchantName,
+        passwordResetLink: `${process.env.WEB_APP_URL}reset/${email}/${passwordResetHash}`,
+      };
+      await sendEmail("/changePassword.hbs", mailOptions, templateValues);
+      res.status(200).json({
+        message: "Reset link sent to your email.",
+      });
+    } else
+      res.status(400).json({ message: "User doesn't exist. Please sign up" });
+  } catch (e) {
+    console.log(e);
+    res
+      .status(400)
+      .json({ message: "Something went wrong! Please try again later" });
+  }
+});
+router.post("/resetPassword", async (req, res) => {
+  const { email, verifyHash, password } = req.body;
+  try {
+    const user = await prisma.user.findUnique({
+      where: { email: email },
+    });
+    console.log(email, verifyHash, password, user.passwordResetHash);
+    if (user) {
+      if (verifyHash === user.passwordResetHash) {
+        const salt = await bcrypt.genSalt(10);
+        let changedPassword = await bcrypt.hash(password, salt);
+        await prisma.user.update({
+          where: { email: email },
+          data: {
+            password: changedPassword,
+          },
+        });
+        res.json({ message: "Changed password" });
+      } else
+        res.status(400).json({
+          message: "Cannot reset please generate a new reset email",
+        });
+    } else res.status(400).json({ message: "This link is expired" });
+  } catch (e) {
+    console.log(e);
+    res
+      .status(400)
+      .json({ message: "Something went wrong! Please try again later" });
+  }
+});
 
 //sign up route
 router.post("/signin", async (req, res) => {
