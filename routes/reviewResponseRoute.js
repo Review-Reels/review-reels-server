@@ -86,10 +86,12 @@ router.post("/reviewResponse", async (req, res) => {
     const { files, body } = req;
     let data = null;
     let size = 0;
+    let isVideo = false;
     if (files && files.fileName) {
       const { data: fileData, size: fileSize } = files.fileName;
       data = fileData;
       size = fileSize;
+      isVideo = true;
     }
     const {
       whatYouDo,
@@ -149,7 +151,13 @@ router.post("/reviewResponse", async (req, res) => {
       responseUserName: customerName,
       imageUrl: `${process.env.S3_URL}${currentReviewResponse.imageUrl}`,
     };
-    await sendEmail("/reviewResponseTemplate.hbs", mailOptions, templateValues);
+    await sendEmail(
+      isVideo
+        ? "/reviewResponseTemplate.hbs"
+        : "/textReviewResponseTemplate.hbs",
+      mailOptions,
+      templateValues
+    );
 
     res.send(currentReviewResponse);
   } catch (e) {
