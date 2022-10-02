@@ -5,6 +5,8 @@ const jwt = require("jsonwebtoken");
 const { PrismaClient } = require("@prisma/client");
 
 const verifyAndGetUser = require("../googleAuth/googleAuth");
+const { nanoid } = require("nanoid");
+const { sendEmail } = require("../utils/sendEmail");
 const prisma = new PrismaClient();
 //sign in route
 router.post("/signup", async (req, res) => {
@@ -14,12 +16,123 @@ router.post("/signup", async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     userObj.password = await bcrypt.hash(userObj.password, salt);
     userData = { ...userObj };
-    const user = await prisma.user.create({ data: userData });
+    const emailVerifyHash = nanoid();
+    const user = await prisma.user.create({
+      data: { ...userData, emailVerifyHash },
+    });
     const removeFields = ({ password, ...rest }) => rest;
+
+    const subject = `Review Reels email verify link ${userObj.merchantName}`;
+    const mailOptions = {
+      from: `no-reply@reviewreels.app`,
+      to: userObj.email,
+      subject: subject,
+    };
+    const templateValues = {
+      merchantName: userObj.merchantName,
+      emailVerifyLink: `${process.env.WEB_APP_URL}verify/${userData.email}/${emailVerifyHash}`,
+    };
+    await sendEmail("/emailVerify.hbs", mailOptions, templateValues);
     res.json(removeFields(user));
   } catch (e) {
     console.log(e);
     res.status(400).json({ message: e.meta.target });
+  }
+});
+
+router.post("/verifyEmail", async (req, res) => {
+  const { email, verifyHash } = req.body;
+  try {
+    const user = await prisma.user.findUnique({
+      where: { email: email },
+    });
+    if (user) {
+      if (verifyHash === user.emailVerifyHash) {
+        await prisma.user.update({
+          where: { email: email },
+          data: {
+            emailVerified: true,
+          },
+        });
+        res.json({ message: "Verified" });
+      } else
+        res.status(400).json({
+          message: "Cannot verify please generate a new verify email",
+        });
+    } else res.status(400).json({ message: "This link is expired" });
+  } catch (e) {
+    console.log(e);
+    res
+      .status(400)
+      .json({ message: "Something went wrong! Please try again later" });
+  }
+});
+router.post("/sendResetPasswordEmail", async (req, res) => {
+  const { email } = req.body;
+  try {
+    const user = await prisma.user.findUnique({
+      where: { email: email },
+    });
+    if (user) {
+      const subject = `Review Reels reset password ${user.merchantName}`;
+      const mailOptions = {
+        from: `no-reply@reviewreels.app`,
+        to: email,
+        subject: subject,
+      };
+      const passwordResetHash = nanoid();
+      await prisma.user.update({
+        where: { email: email },
+        data: {
+          passwordResetHash,
+          passwordResetHashTimeStamp: new Date().toISOString(),
+        },
+      });
+      const templateValues = {
+        merchantName: user.merchantName,
+        passwordResetLink: `${process.env.WEB_APP_URL}reset/${email}/${passwordResetHash}`,
+      };
+      await sendEmail("/changePassword.hbs", mailOptions, templateValues);
+      res.status(200).json({
+        message: "Reset link sent to your email.",
+      });
+    } else
+      res.status(400).json({ message: "User doesn't exist. Please sign up" });
+  } catch (e) {
+    console.log(e);
+    res
+      .status(400)
+      .json({ message: "Something went wrong! Please try again later" });
+  }
+});
+router.post("/resetPassword", async (req, res) => {
+  const { email, verifyHash, password } = req.body;
+  try {
+    const user = await prisma.user.findUnique({
+      where: { email: email },
+    });
+    console.log(email, verifyHash, password, user.passwordResetHash);
+    if (user) {
+      if (verifyHash === user.passwordResetHash) {
+        const salt = await bcrypt.genSalt(10);
+        let changedPassword = await bcrypt.hash(password, salt);
+        await prisma.user.update({
+          where: { email: email },
+          data: {
+            password: changedPassword,
+          },
+        });
+        res.json({ message: "Changed password" });
+      } else
+        res.status(400).json({
+          message: "Cannot reset please generate a new reset email",
+        });
+    } else res.status(400).json({ message: "This link is expired" });
+  } catch (e) {
+    console.log(e);
+    res
+      .status(400)
+      .json({ message: "Something went wrong! Please try again later" });
   }
 });
 
@@ -54,10 +167,11 @@ router.post("/google_sign_in", async (req, res) => {
   const userObj = req.body;
   try {
     const verifiedUser = await verifyAndGetUser(userObj.idToken);
-    console.log(verifiedUser);
+
     if (verifiedUser) {
+      const removeFieldsNbf = ({ nbf, ...rest }) => rest;
       const userData = {
-        ...verifiedUser,
+        ...removeFieldsNbf({ ...verifiedUser }),
         authType: "google",
       };
       let user = await prisma.user.findUnique({
@@ -77,8 +191,9 @@ router.post("/google_sign_in", async (req, res) => {
     } else {
       res.json({ message: "Cannot verify user" });
     }
-  } catch (e) {
-    console.log(e);
+  } catch (error) {
+    console.log(error, "google_sign_in");
+    res.json({ message: "Something went wrong!" });
   }
 });
 

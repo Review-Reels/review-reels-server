@@ -7,10 +7,10 @@ const {
 const { convertVideo } = require("../utils/convertVideo");
 const fs = require("fs");
 
-const upload = (s3FileName, data, platform) => {
+const upload = (s3FileName, data, extension) => {
   return new Promise(async (resolve, reject) => {
     try {
-      if (platform == "ios") {
+      if (extension == "ios") {
         console.log(platform);
         const convertedStream = await convertVideo(data);
         const uploadResponse = await uploadToS3(
@@ -28,8 +28,7 @@ const upload = (s3FileName, data, platform) => {
           removeLocalFile(path);
         });
       } else {
-        console.log(platform);
-        const uploadResponse = await uploadToS3(s3FileName, data, ".mp4");
+        const uploadResponse = await uploadToS3(s3FileName, data, extension);
         const thumbNailPath = await createThumbNail(uploadResponse);
         const fileStream = fs.createReadStream(thumbNailPath);
         await uploadToS3(s3FileName, fileStream, ".jpg");

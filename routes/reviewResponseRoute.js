@@ -10,10 +10,23 @@ const { sendEmail } = require("../utils/sendEmail");
 
 router.get("/reviewResponse", auth, async (req, res) => {
   const { user } = req;
+  const { requestId, searchValue } = req.query;
+
+  const extraWhere = requestId ? { requestMessageId: requestId } : {};
+  const searchQuery = searchValue
+    ? {
+        OR: [
+          { customerName: { contains: searchValue } },
+          { whatYouDo: { contains: searchValue } },
+        ],
+      }
+    : {};
   try {
     const currentReviewResponse = await prisma.reviewResponse.findMany({
       where: {
         requestMessage: { userId: user.id },
+        ...extraWhere,
+        ...searchQuery,
       },
       include: {
         EmailTracker: true,
@@ -31,25 +44,90 @@ router.get("/reviewResponse", auth, async (req, res) => {
   }
 });
 
-router.post("/reviewResponse", async (req, res) => {
-  const { files, body } = req;
-  const { data, size } = files.fileName;
-  const { whatYouDo, customerName, reviewRequestId, platform } = body;
-  const name = new Date().toISOString();
-  const s3FileName = `${reviewRequestId}/${name}`;
+//video Embed without auth
+router.get("/embedReviewResponse", async (req, res) => {
   try {
-    await upload(s3FileName, data, platform);
+    const { responseId } = req.query;
 
-    const currentReviewResponse = await prisma.reviewResponse.create({
-      data: {
-        customerName,
-        whatYouDo,
-        size,
-        videoUrl: s3FileName + ".mp4",
-        imageUrl: s3FileName + ".jpg",
-        requestMessageId: reviewRequestId,
+    const currentReviewResponse = await prisma.reviewResponse.findUnique({
+      where: {
+        id: responseId,
+      },
+      include: {
+        requestMessage: true,
       },
     });
+    res.send(currentReviewResponse);
+  } catch (e) {
+    console.log(e);
+    res.status(400).json(e);
+  }
+});
+
+router.get("/unReadStatistics", auth, async (req, res) => {
+  try {
+    const { user } = req;
+
+    const unReadCount = await prisma.reviewResponse.count({
+      where: {
+        requestMessage: { userId: user.id },
+        isRead: false,
+      },
+    });
+    res.send({ unReadCount });
+  } catch (e) {
+    console.log(e);
+    res.status(400).json(e);
+  }
+});
+
+router.post("/reviewResponse", async (req, res) => {
+  try {
+    const { files, body } = req;
+    let data = null;
+    let size = 0;
+    let isVideo = false;
+    if (files && files.fileName) {
+      const { data: fileData, size: fileSize } = files.fileName;
+      data = fileData;
+      size = fileSize;
+      isVideo = true;
+    }
+    const {
+      whatYouDo,
+      customerName,
+      reviewRequestId,
+      extension,
+      replyMessage,
+    } = body;
+    const name = new Date().toISOString();
+    const s3FileName = `${reviewRequestId}/${name}`;
+    let currentReviewResponse = null;
+    if (data) {
+      await upload(s3FileName, data, extension);
+      currentReviewResponse = await prisma.reviewResponse.create({
+        data: {
+          customerName,
+          whatYouDo,
+          size,
+          videoUrl: s3FileName + extension,
+          imageUrl: s3FileName + ".jpg",
+          requestMessageId: reviewRequestId,
+        },
+      });
+    } else {
+      currentReviewResponse = await prisma.reviewResponse.create({
+        data: {
+          customerName,
+          replyMessage,
+          whatYouDo,
+          size,
+          videoUrl: "",
+          imageUrl: "",
+          requestMessageId: reviewRequestId,
+        },
+      });
+    }
     const reviewRequestUserId = await prisma.reviewRequest.findUnique({
       where: { id: reviewRequestId },
       include: {
@@ -73,7 +151,13 @@ router.post("/reviewResponse", async (req, res) => {
       responseUserName: customerName,
       imageUrl: `${process.env.S3_URL}${currentReviewResponse.imageUrl}`,
     };
-    await sendEmail("/reviewResponseTemplate.hbs", mailOptions, templateValues);
+    await sendEmail(
+      isVideo
+        ? "/reviewResponseTemplate.hbs"
+        : "/textReviewResponseTemplate.hbs",
+      mailOptions,
+      templateValues
+    );
 
     res.send(currentReviewResponse);
   } catch (e) {
@@ -82,6 +166,7 @@ router.post("/reviewResponse", async (req, res) => {
   }
 });
 
+//for email
 router.put("/reviewResponse/:id", async (req, res) => {
   console.log("inside review Response");
   const { body, params, files } = req;

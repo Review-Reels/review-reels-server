@@ -20,6 +20,7 @@ module.exports = async function auth(req, res, next) {
         authType: true,
         username: true,
         merchantName: true,
+        emailVerified: true,
       },
     });
     if (currentUser) {
