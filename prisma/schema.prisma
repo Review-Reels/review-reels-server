@@ -31,7 +31,7 @@ model User {
 model ReviewRequest {
   id             String           @id @default(uuid())
   name           String           @default("")
-  askMessage     String?
+  askMessage     String?          @db.Text()
   videoUrl       String
   imageUrl       String           @default("")
   size           Int
@@ -45,7 +45,7 @@ model ReviewRequest {
 
 model ReviewResponse {
   id               String         @id @default(uuid())
-  replyMessage     String?        @db.VarChar(500)
+  replyMessage     String?        @db.Text()
   customerName     String
   whatYouDo        String?
   videoUrl         String
