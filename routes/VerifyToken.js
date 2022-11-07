@@ -21,6 +21,7 @@ module.exports = async function auth(req, res, next) {
         username: true,
         merchantName: true,
         emailVerified: true,
+        websiteUrl: true,
       },
     });
     if (currentUser) {

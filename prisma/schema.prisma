@@ -25,6 +25,7 @@ model User {
   emailVerifyHash            String          @default("")
   passwordResetHash          String          @default("")
   passwordResetHashTimeStamp DateTime        @default(now())
+  websiteUrl                 String          @default("")
   ReviewRequest              ReviewRequest[]
 }
 
