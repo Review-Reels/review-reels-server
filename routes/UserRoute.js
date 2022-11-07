@@ -21,6 +21,7 @@ router.post("/updateUser", auth, async (req, res) => {
     });
     res.json({ ...updateUser });
   } catch (e) {
+    console.log("Update user error", e);
     if (e.code === "P2002") {
       if (e.meta.target === "username_unique") {
         res.status(400).json({ message: "Username Already Exists" });
