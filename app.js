@@ -23,6 +23,7 @@ const reviewRequestRoute = require("./routes/reviewRequestRoute");
 const reviewResponseRoute = require("./routes/reviewResponseRoute");
 const emailRoute = require("./routes/emailRoute");
 const subscriptionRoute = require("./routes/subscriptionRoute");
+const reviewLibraryRoute = require("./routes/reviewLibraryRoute");
 
 //route middleware
 app.use("/api/auth", authRoute);
@@ -31,6 +32,7 @@ app.use("/api/review", reviewRequestRoute);
 app.use("/api/review", reviewResponseRoute);
 app.use("/api/email", emailRoute);
 app.use("/api/subscription", subscriptionRoute);
+app.use("/api/library", reviewLibraryRoute);
 
 app.post(
   "/webhook",

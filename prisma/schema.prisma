@@ -27,6 +27,7 @@ model User {
   passwordResetHashTimeStamp DateTime        @default(now())
   websiteUrl                 String          @default("")
   ReviewRequest              ReviewRequest[]
+  ReviewLibrary              ReviewLibrary[]
 }
 
 model ReviewRequest {
@@ -72,6 +73,17 @@ model EmailTracker {
   reviewResponseId String?
   ReviewRequest    ReviewRequest?  @relation(fields: [reviewRequestId], references: [id], onDelete: SetNull)
   reviewRequestId  String?
+}
+
+model ReviewLibrary {
+  id                String   @id @default(uuid())
+  libraryName       String
+  description       String?  @default("")
+  libraryConfigJson Json?    @default("[]")
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @default(now())
+  user              User     @relation(fields: [userId], references: [id])
+  userId            String
 }
 
 model Subscription {
